@@ -19,9 +19,9 @@ const Header = () => {
             placeholder="Cari Obat"
             className="px-4 py-2 rounded-full w-64 placeholder:text-white border-2 border-white"
           />
-          <button className="text-white font-medium">Toko Obat</button>
-          <button className="text-white font-medium">Booking Online</button>
-          <button className="text-white font-medium">Blog/Edukasi</button>
+          <button onClick={()=>navigation('/medicine')} className="text-white font-medium">Toko Obat</button>
+          <button onClick={()=>navigation('/booking')} className="text-white font-medium">Booking Online</button>
+          <button onClick={()=>navigation('/article')} className="text-white font-medium">Blog/Edukasi</button>
           <button className="text-white font-medium">Layanan</button>
          
         </div>

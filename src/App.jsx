@@ -11,6 +11,15 @@ import RecoveryOTPPages from './pages/RecoveryOTPPages'
 import RecoveryDonePages from './pages/RecoveryDonePages'
 import ListServicePages from './pages/ListServicePages'
 import BookingServicePages from './pages/BookingServicePages'
+import ProductPages from './pages/ProductPages'
+import ProductDetail from './components/productdetail'
+import ProductDetailPages from './pages/ProductDetailPages'
+import CartPages from './pages/CartPages'
+import CheckoutPages from './pages/CheckoutPages'
+import ArticlePages from './pages/ArticlePages'
+import ArticleDetailPages from './pages/ArticleDetailPages'
+import DashboardPasienPages from './pages/DashboardPasienPages'
+import VideoCallPages from './pages/VideoCallPages'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -27,6 +36,21 @@ function App() {
         <Route path="/recovery/done" element={<RecoveryDonePages/>}/>
         <Route path="/service" element={<ListServicePages/>}/>
         <Route path="/booking" element={<BookingServicePages/>}/>
+        <Route path="/medicine" element={<ProductPages/>}/>
+        <Route path="/medicine/detail" element={<ProductDetailPages/>}/>
+        <Route path="/cart" element={<CartPages/>}/>
+        <Route path="/checkout" element={<CheckoutPages/>}/>
+        <Route path="/article" element={<ArticlePages/>}/>
+        <Route path="/article/:slug" element={<ArticleDetailPages/>}/>
+        <Route path="/dashboard" element={<DashboardPasienPages/>}/>
+        <Route path="/video-call" element={<VideoCallPages/>}/>
+
+
+
+
+
+
+        
         
       </Routes>
      </Router>

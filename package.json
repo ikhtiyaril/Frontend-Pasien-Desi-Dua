@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@editorjs/editorjs": "^2.31.0",
+    "@livekit/components-react": "^2.9.16",
+    "@mantine/core": "^8.3.9",
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
