@@ -38,8 +38,11 @@ const handleJoin = async (booking_id)=> {
             Authorization : `Bearer ${token}`
         }
     })
-    const tokenRoom = res.token
-    navigation('/video-call',{tokenRoom})
+    console.log(res.data)
+    console.log(res.data.token)
+    const tokenRoom = res.data.token
+    console.log(tokenRoom)
+    navigation('/video-call',{state :{tokenRoom}})
 }
 
   if (loading)

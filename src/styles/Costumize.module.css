@@ -1,0 +1,88 @@
+/* Customize.module.css */
+.my-participant-name {
+  color: red;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-left: 0.5rem;
+}
+
+.my-participant-name:hover {
+  color: darkred;
+}
+
+.participant-indicators {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+}
+
+.lk-grid-tile {
+  position: relative;
+  background: #1f1f1f;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.lk-grid-tile video {
+  border-radius: 0.5rem;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.control-overlay {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+}
+
+.control-button {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.control-button:hover {
+  opacity: 0.8;
+}
+
+.control-button.mute {
+  background-color: #16a34a; /* green */
+}
+
+.control-button.mute.off {
+  background-color: #dc2626; /* red */
+}
+
+.control-button.video {
+  background-color: #16a34a;
+}
+
+.control-button.video.off {
+  background-color: #dc2626;
+}
+
+.control-button.leave {
+  background-color: #374151; /* gray */
+}
+
+.control-button.leave:hover {
+  background-color: #b91c1c;
+}
