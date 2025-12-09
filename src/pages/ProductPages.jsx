@@ -1,6 +1,6 @@
 import React from 'react'
 import Header from '../components/Header'
-import ProductListing from '../components/productListing'
+import ProductListing from '../components/ProductListing'
 
 const ProductPages = () => {
   return (

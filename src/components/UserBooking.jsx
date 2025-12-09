@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import PaymentMethodList from "./PaymentMethodList";
+import PaymentMethodCheckbox from "./CheckboxPayment";
+import { Calculator } from "lucide-react";
+import PaymentFeeCalculator from "./CalculatorPayment";
+import FloatingPayment from "./FloatingPayment";
 
 
 export default function UserBooking() {
@@ -26,10 +30,14 @@ export default function UserBooking() {
   const [doctorSchedule, setDoctorSchedule] = useState(null);
   const [blockedTime,setBlockedTime] = useState([])
   const [slots, setSlots] = useState([]);
-
+  const [paymentTime,setPaymentTime] = useState(false)
+  const [paymentMethod,setPaymentMethod] = useState(null)
+  const [paymentData,setPaymentData] = useState(null)
 
   const [selectedService, setSelectedService] = useState(null);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [calculatorData, setCalculatorData] = useState(null)
+  const [paymentTransaction,setPaymentTransaction] = useState(null)
   // =====================
   // FETCH SERVICES
   // =====================
@@ -217,33 +225,58 @@ const generateSlots = () => {
   // =====================
   // SUBMIT
   // =====================
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem("token");
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem("token");
 
+  try {
+    const res = await axios.post(`${API}/api/booking`, form, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    try {
-      await axios.post(`${API}/api/booking`, form, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+    alert("Booking berhasil dibuat!");
+
+    setForm({
+      service_id: "",
+      doctor_id: "",
+      date: "",
+      time_start: "",
+      notes: "",
+    });
+    console.log(res.data.booking)
+console.log("info payment:", JSON.stringify(calculatorData[0].total_fee.merchant));
+    // 🔥 Build payment payload LANGSUNG di sini
+    const paymentPayload = {
+      method: paymentMethod,
+      merchant_ref: res.data.booking.booking_code,
+      amount: selectedService.price + calculatorData[0].total_fee.merchant,
+      order_items: [
+        {
+          name: selectedService.name,
+          price: selectedService.price+calculatorData[0].total_fee.merchant,
+          quantity: 1,
         },
-      });
+      ],
+    };
+
+    // 🔥 Kirim payload-nya, bukan state paymentData
+    const response = await axios.post(`${API}/api/payment`, paymentPayload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    console.log(response.data)
+    setPaymentTransaction(response.data.data);
+
+    setAvailableDoctors([]);
+    setSlots([]);
+  } catch (err) {
+    alert(err.response?.data?.message || "Gagal membuat booking" + err);
+  }
+};
 
 
-      alert("Booking berhasil dibuat!");
-      setForm({
-        service_id: "",
-        doctor_id: "",
-        date: "",
-        time_start: "",
-        notes: "",
-      });
-      setAvailableDoctors([]);
-      setSlots([]);
-    } catch (err) {
-      alert(err.response?.data?.message || "Gagal membuat booking");
-    }
-  };
 const chooseService = (srv) => {
     setSelectedService(srv);
     setSelectedDoctor(null);
@@ -264,10 +297,22 @@ const chooseService = (srv) => {
       doctor_id: doc.id,
     }));
   };
+useEffect(() => {
+  if (paymentMethod) {
+    calculatorPrice();
+  }
+}, [paymentMethod]);
 
-
+const calculatorPrice = async () =>{
+  const res = await axios.post(`${API}/api/payment/fee`,{
+    code : paymentMethod,
+    amount : selectedService.price,
+  })
+ 
+  setCalculatorData(res.data.data)
+}
   return (
-     <div className="min-h-screen bg-gradient-to-r from-blue-500 to-teal-400  p-6 flex gap-6">
+     <div className="min-h-screen bg-linear-to-r from-blue-500 to-teal-400  p-6 flex gap-6">
 
       
 
@@ -343,7 +388,11 @@ const chooseService = (srv) => {
           <select
             name="time_start"
             value={form.time_start}
-            onChange={handleChange}
+            onChange={
+              (e)=>{
+              handleChange(e);
+              setPaymentTime(true);
+            }}
             className="w-full px-3 py-2 border border-blue-200 rounded-lg"
             required
             disabled={slots.length === 0}
@@ -356,10 +405,7 @@ const chooseService = (srv) => {
             ))}
           </select>
 
-  <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Metode Pembayaran</h1>
-      <PaymentMethodList data={payment} />
-    </div>
+  
 
 
         {/* NOTES */}
@@ -374,6 +420,11 @@ const chooseService = (srv) => {
           />
         </div>
 
+ <PaymentMethodCheckbox
+  data={payment}
+  selectedMethod={paymentMethod}
+  onChange={(val) => {setPaymentMethod(val)}}
+/>
 
         <button onClick={handleSubmit} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold">
           Buat Booking
@@ -385,7 +436,7 @@ const chooseService = (srv) => {
         {/* STEP 1: SERVICE LIST */}
         {!selectedService && (
   <div>
-    <h2 className="text-xl font-bold mb-4 text-gray-800">
+    <h2 className="text-xl font-bold mb-4 text-white">
       Pilih Layanan
     </h2>
 
@@ -512,7 +563,7 @@ const chooseService = (srv) => {
 
 
         {/* STEP 3: DATE & TIME INFO */}
-       {selectedDoctor && (
+       {selectedDoctor && !paymentTime && (
   <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
     <div className="flex items-start space-x-4">
       {/* Avatar */}
@@ -594,9 +645,28 @@ const chooseService = (srv) => {
   </div>
 )}
 
+{paymentTime && !paymentMethod && (
+  <div className="p-6" >
+      <h1 className="text-2xl font-bold mb-6 text-white">Metode Pembayaran</h1>
+      <PaymentMethodList data={payment} />
+    </div>
+)}
+
+{
+  paymentMethod && (
+   <>
+   <PaymentFeeCalculator data={calculatorData} service={selectedService}/>
+   </>
+  )
+}
+
+
       </div>
 
-
+ <FloatingPayment
+        payment={paymentTransaction}
+        onClose={() => setPaymentTransaction(null)}
+      />
     </div>
   );
 }

@@ -106,7 +106,7 @@ export default function ArticleHome() {
         />
 
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-black/10 p-6 flex flex-col justify-end">
+        <div className="absolute inset-0 bg-linear-to-t from-black/40 to-black/10 p-6 flex flex-col justify-end">
           <h1 className="text-white text-3xl md:text-4xl font-bold mb-2">
             {highlight.title}
           </h1>
