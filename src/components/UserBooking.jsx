@@ -259,6 +259,7 @@ console.log("info payment:", JSON.stringify(calculatorData[0].total_fee.merchant
           quantity: 1,
         },
       ],
+      id: res.data.booking.id
     };
 
     // 🔥 Kirim payload-nya, bukan state paymentData
@@ -312,7 +313,7 @@ const calculatorPrice = async () =>{
   setCalculatorData(res.data.data)
 }
   return (
-     <div className="min-h-screen bg-linear-to-r from-blue-500 to-teal-400  p-6 flex gap-6">
+     <div className="min-h-screen bg-blue-50  p-6 flex gap-6">
 
       
 
@@ -436,9 +437,7 @@ const calculatorPrice = async () =>{
         {/* STEP 1: SERVICE LIST */}
         {!selectedService && (
   <div>
-    <h2 className="text-xl font-bold mb-4 text-white">
-      Pilih Layanan
-    </h2>
+   
 
     <div className="grid grid-cols-1 gap-5">
       {services.map((s) => (
@@ -504,9 +503,6 @@ const calculatorPrice = async () =>{
         {/* STEP 2: DOCTOR LIST */}
         {selectedService && !selectedDoctor && (
   <div>
-    <h2 className="text-xl font-bold mb-4 text-white">
-      Pilih Dokter untuk {selectedService.name}
-    </h2>
 
     <div className="grid grid-cols-1 md:grid-cols gap-4">
       {doctors

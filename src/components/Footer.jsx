@@ -6,7 +6,7 @@ export default function Footer() {
         {/* Logo & Desc */}
         <div className="space-y-3">
           <h2 className="text-2xl font-semibold text-blue-700">
-            Desi Dua Klinik
+            Desidua Klinik
           </h2>
           <p className="text-gray-600 text-sm leading-relaxed">
             Layanan kesehatan terpercaya dengan tenaga profesional
@@ -30,7 +30,7 @@ export default function Footer() {
           <h3 className="font-semibold mb-4">Informasi Klinik</h3>
           <ul className="space-y-3 text-gray-600 text-sm">
             <li>
-              <strong>Alamat:</strong> Jl. Klinik Sehat No. 21, Kediri
+              <strong>Alamat:</strong> Jl. Klinik Sehat No. 21, Jakarta
             </li>
             <li>
               <strong>Jam Operasional:</strong><br />

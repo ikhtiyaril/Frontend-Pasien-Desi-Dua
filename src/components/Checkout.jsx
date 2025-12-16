@@ -1,24 +1,36 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import FloatingPayment from "../components/FloatingPayment";
+import PaymentMethodCheckbox from "./CheckboxPayment";
 
 const API = import.meta.env.VITE_API_URL;
 
 export default function Checkout() {
   const navigate = useNavigate();
+
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [shippingMethod, setShippingMethod] = useState("reguler"); // dummy ongkir
-  const [paymentMethod, setPaymentMethod] = useState("manual"); // dummy payment
-  const [shippingCost, setShippingCost] = useState(10000); // default ongkir
 
+  const [shippingMethod, setShippingMethod] = useState("reguler");
+  const [shippingCost, setShippingCost] = useState(10000);
+
+  const [paymentMethod, setPaymentMethod] = useState(""); // Tripay code
+  const [paymentFee, setPaymentFee] = useState(null); // hasil fee calculator
+const [payment,setPayment]= useState([])
+  const [paymentTransaction, setPaymentTransaction] = useState(null); // untuk FloatingPayment
+
+  const token = localStorage.getItem("token");
+
+  // =============================
+  // FETCH CART
+  // =============================
   const fetchCart = async () => {
     try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
       const res = await axios.get(`${API}/api/cart`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(res.data.data.items)
       setCart(res.data.data.items || []);
     } catch (err) {
       console.error(err);
@@ -27,59 +39,119 @@ export default function Checkout() {
     }
   };
 
+  const fetchPayment = async () => {
+    try {
+      const res = await axios.get(
+        ` ${API}/api/payment`,
+      );
+  
+      console.log(res.data.data.data);
+   setPayment(res.data.data.data)
+    } catch (error) {
+      console.error(error.response?.data || error.message);
+    }
+  };
+  
+
   useEffect(() => {
     fetchCart();
+    fetchPayment()
   }, []);
 
-  // Hitung total barang
-  const totalItemsPrice = cart.reduce(
+  // =============================
+  // HITUNG TOTAL BARANG
+  // =============================
+  const subtotal = cart.reduce(
     (acc, item) => acc + item.quantity * item.product.price,
     0
   );
 
-  const totalPrice = totalItemsPrice + shippingCost;
+  // =============================
+  // PAYMENT FEE FROM TRIPAY
+  // =============================
+  const fetchPaymentFee = async (method) => {
+    if (!method) return;
 
-  // Dummy change ongkir
-  const handleShippingChange = (method) => {
-    setShippingMethod(method);
-    switch (method) {
-      case "reguler":
-        setShippingCost(10000);
-        break;
-      case "express":
-        setShippingCost(20000);
-        break;
-      default:
-        setShippingCost(10000);
-    }
-  };
-
-  // Checkout
-  const handleCheckout = async () => {
     try {
-      const token = localStorage.getItem("token");
-
-      // Optional: validate checkout dulu
-      await axios.post(
-        `${API}/api/checkout/validate`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
       const res = await axios.post(
-        `${API}/api/checkout`,
-        { payment_method: paymentMethod },
+        `${API}/api/payment/fee`,
+        {
+          code :method,amount:subtotal
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert("Checkout berhasil! Order ID: " + res.data.order.id);
-      navigate("/orders"); // redirect ke halaman orders
+      setPaymentFee(res.data.data[0]); // Tripay always returns array
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Checkout gagal");
+      console.error("Fee Calc Error:", err);
     }
   };
 
+  useEffect(() => {
+    if (paymentMethod) {
+      fetchPaymentFee(paymentMethod);
+    }
+  }, [paymentMethod, subtotal]);
+
+  // =============================
+  // TOTAL FINAL
+  // =============================
+  
+  const tripayFee = paymentFee?.total_fee?.merchant || 0;
+
+  const finalTotal = subtotal + shippingCost + tripayFee;
+
+  // =============================
+  // ON CHECKOUT
+  // =============================
+  const handleCheckout = async () => {
+  if (!paymentMethod) return alert("Pilih metode pembayaran dulu!");
+
+  try {
+    // 1. Buat transaksi/order di backend
+    const orderRes = await axios.post(
+      `${API}/api/orders/create`,
+      {
+        items : cart,
+        total_price: finalTotal, // subtotal + ongkir + fee
+        payment_method: paymentMethod,
+       
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const order = orderRes.data.order;
+    const reference = order.order_code; // bisa pakai order_code sebagai merchant_ref
+console.log(order)
+    // 2. Buat pembayaran Tripay
+    const paymentRes = await axios.post(
+      `${API}/api/payment/checkout`,
+      {
+        reference,
+        paymentMethod,
+        amount: subtotal,
+        shipping_cost: shippingCost,
+        fee_customer: tripayFee,
+        orderItems: cart.map(item => ({
+          name: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity
+        })),
+        id : order.id
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+console.log(paymentRes.data)
+    setPaymentTransaction(paymentRes.data.data.data);
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.message || "Checkout gagal");
+  }
+};
+
+  // =============================
+  // DISPLAY
+  // =============================
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   if (!cart.length)
@@ -99,7 +171,7 @@ export default function Checkout() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">Checkout</h1>
 
-      {/* Cart Items */}
+      {/* CART */}
       <div className="space-y-4 mb-6">
         {cart.map((item) => (
           <div
@@ -108,8 +180,7 @@ export default function Checkout() {
           >
             <div className="flex items-center space-x-4">
               <img
-                src={item.product.image}
-                alt={item.product.name}
+                src={item.product.image_url}
                 className="w-20 h-20 object-cover rounded"
               />
               <div>
@@ -126,53 +197,57 @@ export default function Checkout() {
         ))}
       </div>
 
-      {/* Shipping */}
+      {/* SHIPPING */}
       <div className="mb-6 p-4 border rounded">
-        <h2 className="font-semibold mb-2">Ongkir (Shipping)</h2>
-        <div className="flex space-x-4">
-          <label className="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="shipping"
-              value="reguler"
-              checked={shippingMethod === "reguler"}
-              onChange={() => handleShippingChange("reguler")}
-            />
-            <span>Reguler - Rp 10.000</span>
-          </label>
-          <label className="flex items-center space-x-2">
-            <input
-              type="radio"
-              name="shipping"
-              value="express"
-              checked={shippingMethod === "express"}
-              onChange={() => handleShippingChange("express")}
-            />
-            <span>Express - Rp 20.000</span>
-          </label>
-        </div>
+        <h2 className="font-semibold mb-2">Ongkir</h2>
+        <label className="flex items-center space-x-2">
+          <input
+            type="radio"
+            value="reguler"
+            checked={shippingMethod === "reguler"}
+            onChange={() => {
+              setShippingMethod("reguler");
+              setShippingCost(10000);
+            }}
+          />
+          <span>Reguler - Rp 10.000</span>
+        </label>
+        <label className="flex items-center space-x-2 mt-2">
+          <input
+            type="radio"
+            value="express"
+            checked={shippingMethod === "express"}
+            onChange={() => {
+              setShippingMethod("express");
+              setShippingCost(20000);
+            }}
+          />
+          <span>Express - Rp 20.000</span>
+        </label>
       </div>
 
-      {/* Payment */}
+      {/* PAYMENT */}
       <div className="mb-6 p-4 border rounded">
         <h2 className="font-semibold mb-2">Metode Pembayaran</h2>
-        <select
-          className="border rounded p-2 w-full"
-          value={paymentMethod}
-          onChange={(e) => setPaymentMethod(e.target.value)}
-        >
-          <option value="manual">Manual Transfer</option>
-          <option value="credit_card">Credit Card</option>
-          <option value="e_wallet">E-Wallet</option>
-        </select>
+
+         <PaymentMethodCheckbox
+          data={payment}
+          selectedMethod={paymentMethod}
+          onChange={(val) => {setPaymentMethod(val)}}
+        />
       </div>
 
-      {/* Total & Button */}
-      <div className="p-4 border rounded flex justify-between items-center">
+      {/* TOTAL */}
+      <div className="p-4 border rounded flex justify-between items-center mb-8">
         <div>
-          <p className="text-gray-500">Subtotal: Rp {totalItemsPrice}</p>
+          <p className="text-gray-500">Subtotal: Rp {subtotal}</p>
           <p className="text-gray-500">Ongkir: Rp {shippingCost}</p>
-          <p className="text-xl font-bold">Total: Rp {totalPrice}</p>
+          <p className="text-gray-500">
+            Fee Payment: Rp {tripayFee || 0}
+          </p>
+          <p className="text-xl font-bold mt-1">
+            Total: Rp {finalTotal}
+          </p>
         </div>
         <button
           onClick={handleCheckout}
@@ -181,6 +256,14 @@ export default function Checkout() {
           Bayar Sekarang
         </button>
       </div>
+
+      {/* FLOATING PAYMENT */}
+      {paymentTransaction && (
+        <FloatingPayment
+          payment={paymentTransaction}
+          onClose={() => setPaymentTransaction(null)}
+        />
+      )}
     </div>
   );
 }

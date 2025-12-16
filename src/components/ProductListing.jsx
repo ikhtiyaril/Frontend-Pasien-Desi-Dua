@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Navigate, useNavigate } from "react-router-dom";
+import PromoCarousel from "./PromoCorousel";
 
 const API_BASE = import.meta.env.VITE_API_URL; 
 
@@ -50,6 +51,29 @@ export default function ProductListing() {
     if (prescriptionFilter === "no-need") return !p.is_prescription_required;
     return true;
   });
+
+const addToCart = async (productId) => {
+    try {
+    const token = localStorage.getItem("token"); // ambil token dari localStorage
+    const res = await axios.post(
+      `${API_BASE}/api/cart/add`,
+      { product_id: productId, quantity : 1 },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // misal mau kasih notifikasi
+    alert(res.data.message);
+    return res.data.data; // kembalikan data item cart
+
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.message || "Gagal menambahkan ke keranjang");
+  }
+};
 
   return (
     <div className="min-h-screen bg-blue-50 p-6">
@@ -124,57 +148,64 @@ export default function ProductListing() {
           </div>
         )}
 
+<PromoCarousel/>
         {/* PRODUCT GRID */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {!loading &&
             filteredProducts.map((item) => (
               <div
-                key={item.id}
-                className="bg-white rounded-xl shadow hover:shadow-lg transition p-3"
-              >
-                {/* Image */}
-                <div className="w-full h-36 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
-                  <img
-                    src={item.image_url || "/no-image.png"}
-                    className="h-full object-cover"
-                    alt={item.name}
-                  />
-                </div>
+  key={item.id}
+  onClick={() =>
+    navigate("/medicine/detail", { state: { products_id: item.id } })
+  }
+  className="bg-white rounded-xl shadow hover:shadow-lg transition p-3 cursor-pointer"
+>
+  {/* Image */}
+  <div className="w-full h-36 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
+    <img
+      src={item.image_url || "/no-image.png"}
+      className="h-full object-cover"
+      alt={item.name}
+    />
+  </div>
 
-                <h2 className="font-semibold text-md mt-3 text-gray-800 line-clamp-2">
-                  {item.name}
-                </h2>
+  <h2 className="font-semibold text-md mt-3 text-gray-800 line-clamp-2">
+    {item.name}
+  </h2>
 
-                <p className="text-blue-600 font-bold mt-1">
-                  Rp {Number(item.price).toLocaleString("id-ID")}
-                </p>
+  <p className="text-blue-600 font-bold mt-1">
+    Rp {Number(item.price).toLocaleString("id-ID")}
+  </p>
 
-                {/* Stock */}
-                <p
-                  className={`mt-1 text-sm ${
-                    item.stock > 0 ? "text-green-600" : "text-red-500"
-                  }`}
-                >
-                  {item.stock > 0
-                    ? `Stok: ${item.stock}`
-                    : "Stok Habis"}
-                </p>
+  {/* Stock */}
+  <p
+    className={`mt-1 text-sm ${
+      item.stock > 0 ? "text-green-600" : "text-red-500"
+    }`}
+  >
+    {item.stock > 0 ? `Stok: ${item.stock}` : "Stok Habis"}
+  </p>
 
-                {/* Prescription Label */}
-                {item.is_prescription_required && (
-                  <span className="inline-block bg-red-100 text-red-600 text-xs mt-2 px-2 py-1 rounded-lg">
-                    Butuh Resep
-                  </span>
-                )}
+  {/* Prescription Label */}
+  {item.is_prescription_required && (
+    <span className="inline-block bg-red-100 text-red-600 text-xs mt-2 px-2 py-1 rounded-lg">
+      Butuh Resep
+    </span>
+  )}
 
-                {/* Button Detail */}
-                <button
-                  onClick={() => navigate("/medicine/detail", { state: { products_id: item.id } })}
-                  className="mt-3 block bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 p-3"
-                >
-                  Lihat Detail
-                </button>
-              </div>
+  {/* Tombol Tambah Keranjang */}
+  <button
+    onClick={(e) => {
+      e.stopPropagation(); // cegah redirect
+      addToCart(item.id);
+    }}
+    className="mt-3 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
+  >
+    
+    Tambah Keranjang
+  </button>
+</div>
+
             ))}
         </div>
       </div>

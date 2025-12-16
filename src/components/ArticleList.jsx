@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -38,68 +42,79 @@ export default function ArticleList() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Articles</h1>
+    <div className="p-6 max-w-6xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-blue-700">Articles</h1>
 
-      {/* Search */}
       <div className="mb-4">
-        <input
-          type="text"
+        <Input
           placeholder="Search articles..."
-          className="border p-2 w-full rounded"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className="border-blue-300 focus-visible:ring-blue-500"
         />
       </div>
 
-      {/* Article List */}
       {loading ? (
-        <p className="text-gray-500">Loading...</p>
-      ) : articles.length > 0 ? (
         <div className="space-y-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="w-full h-28 rounded-xl" />
+          ))}
+        </div>
+      ) : articles.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map((article) => (
-            <div
+            <Card
               key={article.id}
-              className="border p-4 rounded-lg shadow-sm bg-white cursor-pointer hover:bg-gray-50 transition"
+              className="shadow-sm hover:shadow-md transition cursor-pointer border-blue-100"
               onClick={() => navigate(`/article/${article.slug}`)}
             >
-              <h2 className="text-xl font-semibold mb-1">{article.title}</h2>
-              <p className="text-gray-500 text-sm mb-2">
-                By: {article.author?.name ?? "Unknown"} | Category:{" "}
-                {article.category?.name ?? "Uncategorized"}
-              </p>
-              <p className="text-gray-700">
-                {article.excerpt ||
-                  article.content?.blocks?.[0]?.data?.text ||
-                  "No excerpt"}
-              </p>
-            </div>
+              {article.thumbnail && (
+                <img
+                  src={article.thumbnail}
+                  alt={article.title}
+                  className="w-full h-40 object-cover rounded-t-xl"
+                />
+              )}
+
+              <CardContent className="p-4">
+                <h2 className="text-lg font-semibold text-blue-600 mb-1">
+                  {article.title}
+                </h2>
+                <p className="text-gray-500 text-sm mb-2">
+                  By: {article.author?.name ?? "Unknown"} | Category: {article.category?.name ?? "Uncategorized"}
+                </p>
+                <p className="text-gray-700 text-sm line-clamp-3">
+                  {article.excerpt || article.content?.blocks?.[0]?.data?.text || "No excerpt"}
+                </p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       ) : (
         <p className="text-gray-500">No articles found.</p>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-6 flex justify-center items-center space-x-2">
-          <button
+        <div className="mt-8 flex justify-center items-center gap-3">
+          <Button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+            variant="outline"
+            className="border-blue-300 text-blue-600"
           >
             Prev
-          </button>
-          <span>
+          </Button>
+          <span className="text-blue-700 font-medium">
             Page {page} of {totalPages}
           </span>
-          <button
+          <Button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+            variant="outline"
+            className="border-blue-300 text-blue-600"
           >
             Next
-          </button>
+          </Button>
         </div>
       )}
     </div>
