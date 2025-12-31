@@ -1,6 +1,8 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const Landing = () => {
+  const navigation = useNavigate()
   return (
     <div className="w-full bg-linear-to-b from-blue-600 to-blue-800 text-white">
       
@@ -68,13 +70,14 @@ const Landing = () => {
       <div className="bg-white text-blue-900 py-16">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            ["Live Consultation", "Video call langsung dengan dokter pilihan Anda."],
-            ["Booking Online", "Jadwal dokter real-time dan proses booking cepat."],
-            ["Drug Marketplace", "Akses obat terpercaya dengan pengiriman cepat."],
-            ["Get Education", "Artikel edukasi kesehatan terbaru setiap hari."],
-          ].map(([title, desc]) => (
+            ["Live Consultation", "Video call langsung dengan dokter pilihan Anda.","/booking"],
+            ["Booking Online", "Jadwal dokter real-time dan proses booking cepat.","/booking"],
+            ["Drug Marketplace", "Akses obat terpercaya dengan pengiriman cepat.","/medicine"],
+            ["Get Education", "Artikel edukasi kesehatan terbaru setiap hari.","/article"],
+          ].map(([title, desc,link]) => (
             <div
               key={title}
+              onClick={()=>navigation(link)}
               className="p-6 rounded-2xl shadow-md border hover:shadow-lg transition"
             >
               <h3 className="text-xl font-bold">{title}</h3>

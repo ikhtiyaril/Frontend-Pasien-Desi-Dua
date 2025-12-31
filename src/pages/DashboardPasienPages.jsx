@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import BookingDashboard from "../components/BookingDashboard";
 import OrdersDashboard from "@/components/OrdersDashboard";
 import Cart from "../components/Cart";
 import { CalendarCheck, ClipboardList, ShoppingCart } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 export default function DashboardPasienPages() {
+  const location = useLocation()
+  const {active} = location.state || {}
   const menu = [
     { key: "booking", label: "Booking", icon: CalendarCheck },
     { key: "orders", label: "Orders", icon: ClipboardList },
@@ -13,7 +16,11 @@ export default function DashboardPasienPages() {
   ];
 
   const [activeMenu, setActiveMenu] = useState("booking");
-
+  useEffect(() => {
+  if (active) {
+    setActiveMenu(active)
+  }
+}, [active])
   const renderContent = () => {
     switch (activeMenu) {
       case "booking":
@@ -21,7 +28,7 @@ export default function DashboardPasienPages() {
       case "orders":
         return <OrdersDashboard />;
       case "cart":
-        return <Cart />;
+        return <Cart/>;
       default:
         return <div className="p-6">Menu tidak ditemukan.</div>;
     }

@@ -30,15 +30,17 @@ export default function Footer() {
           <h3 className="font-semibold mb-4">Informasi Klinik</h3>
           <ul className="space-y-3 text-gray-600 text-sm">
             <li>
-              <strong>Alamat:</strong> Jl. Klinik Sehat No. 21, Jakarta
+              <strong>Alamat:</strong> Ruko victory square no 11, Jalan Buaran Raya, Kec. Serpong, Tangerang Selatan 15310
             </li>
             <li>
               <strong>Jam Operasional:</strong><br />
               Senin–Sabtu: 08.00–20.00
             </li>
             <li>
-              <strong>WhatsApp:</strong> <span className="text-blue-600">+62 812-3456-7890</span>
+              <strong>WhatsApp:</strong> <span className="text-blue-600">+62 811-8000-2350</span>
             </li>
+            <li> <strong>Email:</strong> <br/>
+            desiduaapotek@gmail.com</li>
           </ul>
         </div>
 
