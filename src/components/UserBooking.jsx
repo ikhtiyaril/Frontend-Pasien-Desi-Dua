@@ -699,7 +699,7 @@ const calculatorPrice = async () =>{
     <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
       <div>
         <p className="text-gray-500">Nomor Telepon</p>
-        <p className="font-medium text-gray-700">{selectedDoctor.phone}</p>
+        <p className="font-medium text-gray-700">085X-XXXX-XXXX</p>
       </div>
 
       {selectedDoctor.price && (

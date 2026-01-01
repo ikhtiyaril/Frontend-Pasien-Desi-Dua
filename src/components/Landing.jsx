@@ -22,11 +22,11 @@ const Landing = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 sm:justify-center md:justify-start">
-            <button className="px-6 py-3 bg-white text-blue-700 font-semibold rounded-xl shadow-md hover:opacity-90 transition">
-              Start Your Journey
+            <button onClick={()=>navigation('/booking')} className="px-6 py-3 bg-white text-blue-700 font-semibold rounded-xl shadow-md hover:opacity-90 transition">
+              Booking Sekarang
             </button>
-            <button className="px-6 py-3 border border-white text-white font-semibold rounded-xl hover:bg-white hover:text-blue-700 transition">
-              Explore Features
+            <button onClick={()=>navigation('/about-us')} className="px-6 py-3 border border-white text-white font-semibold rounded-xl hover:bg-white hover:text-blue-700 transition">
+              Siapa Kami?
             </button>
           </div>
         </div>

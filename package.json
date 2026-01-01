@@ -16,6 +16,7 @@
     "@editorjs/image": "^2.10.3",
     "@editorjs/list": "^2.0.9",
     "@editorjs/quote": "^2.7.6",
+    "@heroicons/react": "^2.2.0",
     "@livekit/components-react": "^2.9.16",
     "@mantine/core": "^8.3.9",
     "@radix-ui/react-slot": "^1.2.4",

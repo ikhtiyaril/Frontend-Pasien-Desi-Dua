@@ -19,6 +19,12 @@ import ArticlePages from './pages/ArticlePages'
 import ArticleDetailPages from './pages/ArticleDetailPages'
 import DashboardPasienPages from './pages/DashboardPasienPages'
 import VideoCallPages from './pages/VideoCallPages'
+import DoctorList from './components/DoctorList'
+import DetailDoctorPages from './pages/DetailDoctorPages'
+import AboutUsPages from './pages/AboutUsPages'
+import ServicesPages from './pages/ServicesPages'
+import ContactPages from './pages/ContactPages'
+import DoctorListPages from './pages/DoctorListPages'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -43,6 +49,13 @@ function App() {
         <Route path="/article/:slug" element={<ArticleDetailPages/>}/>
         <Route path="/dashboard" element={<DashboardPasienPages/>}/>
         <Route path="/video-call" element={<VideoCallPages/>}/>
+        <Route path="/we-doctor" element={<DoctorListPages/>}/>
+        <Route path="/doctor/:id" element={<DetailDoctorPages/>}/>
+        <Route path="/about-us" element={<AboutUsPages/>}/>
+        <Route path="/layanan" element={<ServicesPages/>}/>
+        <Route path="/contact" element={<ContactPages/>}/>
+
+
 
 
 

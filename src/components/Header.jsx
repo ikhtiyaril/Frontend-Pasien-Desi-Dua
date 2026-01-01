@@ -282,9 +282,8 @@ const Header = () => {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border-2 border-blue-100 overflow-hidden">
                   <ul className="py-1">
                     {[
-                      { label: "Tentang Kami", href: "/about" },
-                      { label: "Desidua", href: "/desidua" },
-                      { label: "Dokter Kami", href: "/dokter-kami" },
+                      { label: "Tentang Kami", href: "/about-us" },
+                      { label: "Dokter Kami", href: "/we-doctor" },
                       { label: "Layanan", href: "/layanan" },
                       { label: "Kontak", href: "/contact" },
                     ].map((item) => (
@@ -456,8 +455,8 @@ const Header = () => {
               <div className="pt-2 border-t-2 border-blue-100">
                 <p className="px-4 py-2 text-xs font-bold text-gray-500 uppercase">Informasi</p>
                 {[
-                  { label: "Tentang Kami", href: "/about" },
-                  { label: "Dokter Kami", href: "/dokter-kami" },
+                  { label: "Tentang Kami", href: "/about-us" },
+                  { label: "Dokter Kami", href: "/we-doctor" },
                   { label: "Layanan", href: "/layanan" },
                   { label: "Kontak", href: "/contact" },
                 ].map((item) => (

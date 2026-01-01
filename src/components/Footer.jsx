@@ -1,6 +1,29 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
 export default function Footer() {
+  const [clinicData, setClinicData] = useState(null);
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    const fetchClinic = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/clinic-profile`);
+        if (res.data) setClinicData(res.data);
+      } catch (err) {
+        console.error("Failed to fetch clinic data:", err);
+      }
+    };
+
+    fetchClinic();
+  }, [API_URL]);
+
+  if (!clinicData) return <footer className="py-12 text-center">Loading footer...</footer>;
+
+  const { contact, operationalHours, shortDescription } = clinicData;
+
   return (
-    <footer className="bg-gray-50 border-t mt-12">
+    <footer className="bg-gray-50 border-t ">
       <div className="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-4 gap-10">
         
         {/* Logo & Desc */}
@@ -9,8 +32,7 @@ export default function Footer() {
             Desidua Klinik
           </h2>
           <p className="text-gray-600 text-sm leading-relaxed">
-            Layanan kesehatan terpercaya dengan tenaga profesional
-            dan fasilitas modern untuk kebutuhan medis Anda.
+            {shortDescription || "Layanan kesehatan terpercaya dengan tenaga profesional dan fasilitas modern untuk kebutuhan medis Anda."}
           </p>
         </div>
 
@@ -30,17 +52,19 @@ export default function Footer() {
           <h3 className="font-semibold mb-4">Informasi Klinik</h3>
           <ul className="space-y-3 text-gray-600 text-sm">
             <li>
-              <strong>Alamat:</strong> Ruko victory square no 11, Jalan Buaran Raya, Kec. Serpong, Tangerang Selatan 15310
+              <strong>Alamat:</strong> {contact?.address || "-"}
             </li>
             <li>
               <strong>Jam Operasional:</strong><br />
-              Senin–Sabtu: 08.00–20.00
+              Senin–Sabtu: {operationalHours?.monday || "08.00"}–{operationalHours?.saturday || "20.00"}
             </li>
             <li>
-              <strong>WhatsApp:</strong> <span className="text-blue-600">+62 811-8000-2350</span>
+              <strong>WhatsApp:</strong> <span className="text-blue-600">{contact?.phone || "-"}</span>
             </li>
-            <li> <strong>Email:</strong> <br/>
-            desiduaapotek@gmail.com</li>
+            <li>
+              <strong>Email:</strong> <br/>
+              {contact?.email || "-"}
+            </li>
           </ul>
         </div>
 
@@ -48,7 +72,6 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-4">Ikuti Kami</h3>
           <div className="flex space-x-4">
-            
             {/* IG */}
             <a className="hover:opacity-70 cursor-pointer">
               <svg
@@ -81,7 +104,6 @@ export default function Footer() {
                 <path d="M10 15l5.19-3L10 9v6zm12-3c0-2.5-.2-4.1-.5-5.1-.3-1-1-1.8-2-2C18.6 4.4 12 4.4 12 4.4s-6.6 0-7.5.5c-1 .3-1.7 1-2 2C2.2 7.9 2 9.5 2 12s.2 4.1.5 5.1c.3 1 1 1.8 2 2 .9.5 7.5.5 7.5.5s6.6 0 7.5-.5c1-.3 1.7-1 2-2 .3-1 .5-2.6.5-5.1z" />
               </svg>
             </a>
-
           </div>
         </div>
       </div>

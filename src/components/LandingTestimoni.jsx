@@ -8,7 +8,7 @@ const testimonialData = [
     avatar: "https://placehold.co/100x100/2563eb/ffffff?text=SW",
     testimonial: "Sangat membantu.. malam2 butuh obat, gak perlu keluar rumah. Pelayanannya cepat dan obatnya langsung diantar ke rumah. Recommended banget!",
     buttonText: "Beli Obat",
-    buttonLink: "/beli-obat",
+    buttonLink: "/medicine",
     rating: 5
   },
   {
@@ -17,7 +17,7 @@ const testimonialData = [
     avatar: "https://placehold.co/100x100/2563eb/ffffff?text=LA",
     testimonial: "Sangat Helpful!!! Terima kasih yaa, sangat menghemat waktu dan respon dokternya juga baik. Resep obatnya juga manjur sekali. Thank u ya 🥰 semoga kedepannya tambah keren lagi.",
     buttonText: "Chat dengan Dokter",
-    buttonLink: "/chat-dokter",
+    buttonLink: "/booking",
     rating: 5
   },
   {
@@ -26,7 +26,7 @@ const testimonialData = [
     avatar: "https://placehold.co/100x100/2563eb/ffffff?text=AF",
     testimonial: "Menggunakan Halodoc untuk pemanggilan Home Service kesehatan. Sangat memuaskan, walau di proses perlu perubahan jasa medis, tetap dilayani dengan cepat, dan proses refund mudah & cepat. Semoga bisa dipertahankan 💕",
     buttonText: "Pesan Tes Lab",
-    buttonLink: "/pesan-tes-lab",
+    buttonLink: "/booking",
     rating: 5
   },
   {
@@ -35,7 +35,7 @@ const testimonialData = [
     avatar: "https://placehold.co/100x100/2563eb/ffffff?text=DK",
     testimonial: "Klinik Dasi Dua sangat profesional dan ramah. Dokternya sabar menjelaskan kondisi kesehatan saya. Fasilitas bersih dan nyaman. Sangat direkomendasikan untuk keluarga!",
     buttonText: "Booking Dokter",
-    buttonLink: "/booking-dokter",
+    buttonLink: "/booking",
     rating: 5
   },
   {
@@ -44,7 +44,7 @@ const testimonialData = [
     avatar: "https://placehold.co/100x100/2563eb/ffffff?text=BS",
     testimonial: "Pelayanan cepat dan tidak perlu antri lama. Aplikasinya mudah digunakan untuk booking jadwal. Staff klinik sangat helpful dan komunikatif.",
     buttonText: "Daftar Sekarang",
-    buttonLink: "/daftar",
+    buttonLink: "/register",
     rating: 5
   },
   {

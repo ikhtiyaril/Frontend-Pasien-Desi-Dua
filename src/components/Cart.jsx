@@ -1,77 +1,132 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import RequestPrescriptionModal from "../components/RequestPrescriptionModal";
 
 const API = import.meta.env.VITE_API_URL;
 
 export default function Cart() {
   const navigate = useNavigate();
+
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  /* ================= FETCH CART ================= */
+  const [prescriptionAccess, setPrescriptionAccess] = useState({});
+  const [validationErrors, setValidationErrors] = useState([]);
+  const [validating, setValidating] = useState(false);
 
-  const fetchCart = async () => {
+  const [showModal, setShowModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const authHeader = {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  };
+
+  /* ================= FETCH CART ================= */
+  const fetchCart = useCallback(async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`${API}/api/cart`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCart(res.data.data);
+      const res = await axios.get(`${API}/api/cart`, authHeader);
+      const cartData = res.data.data;
+      setCart(cartData);
+
+      // cek akses resep
+      for (const item of cartData.items) {
+        if (item.product.is_prescription_required) {
+          checkPrescriptionAccess(item.product.id);
+        }
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  /* ================= CHECK PRESCRIPTION ================= */
+  const checkPrescriptionAccess = async (productId) => {
+    try {
+      const res = await axios.get(
+        `${API}/api/prescription/access/check?productId=${productId}`,
+        authHeader
+      );
+
+      setPrescriptionAccess((prev) => ({
+        ...prev,
+        [productId]: res.data.access,
+      }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* ================= VALIDATE CART ================= */
+  const validateCart = async () => {
+    try {
+      setValidating(true);
+      const res = await axios.get(`${API}/api/cart/validate`, authHeader);
+      setValidationErrors(res.data.errors || []);
+      return res.data.valid;
+    } catch (err) {
+      return false;
+    } finally {
+      setValidating(false);
+    }
+  };
+
+  /* ================= ACTIONS ================= */
+  const updateQty = async (itemId, qty) => {
+    if (qty <= 0) {
+      await removeItem(itemId);
+      return;
+    }
+    await axios.put(
+      `${API}/api/cart/update/${itemId}`,
+      { quantity: qty },
+      authHeader
+    );
+    fetchCart();
+  };
+
+  const removeItem = async (itemId) => {
+    await axios.delete(`${API}/api/cart/remove/${itemId}`, authHeader);
+    fetchCart();
+  };
+
+  const clearCart = async () => {
+    await axios.delete(`${API}/api/cart/clear`, authHeader);
+    fetchCart();
+  };
+
+  const handleCheckout = async () => {
+    const valid = await validateCart();
+    if (valid) navigate("/checkout");
   };
 
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, [fetchCart]);
 
-  /* ================= ACTION ================= */
+  /* ================= COMPUTED ================= */
+  const hasStockIssue = cart?.items.some(
+    (item) => item.product.stock < item.quantity
+  );
 
-  const updateQty = async (itemId, qty) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.put(
-        `${API}/api/cart/update/${itemId}`,
-        { quantity: qty },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchCart();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const hasPrescriptionIssue = cart?.items.some(
+    (item) =>
+      item.product.is_prescription_required &&
+      !prescriptionAccess[item.product.id]
+  );
 
-  const removeItem = async (itemId) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API}/api/cart/remove/${itemId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchCart();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const canCheckout = !hasStockIssue && !hasPrescriptionIssue;
 
-  const clearCart = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API}/api/cart/clear`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchCart();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const totalPrice =
+    cart?.items.reduce(
+      (acc, item) => acc + item.quantity * item.product.price,
+      0
+    ) || 0;
 
-  /* ================= STATE ================= */
-
+  /* ================= UI ================= */
   if (loading)
     return (
       <div className="text-center mt-10 text-blue-600 font-medium">
@@ -81,133 +136,158 @@ export default function Cart() {
 
   if (!cart || cart.items.length === 0)
     return (
-      <div className="text-center mt-20 px-4">
-        <p className="text-gray-600 text-lg">Keranjangmu masih kosong 😢</p>
+      <div className="text-center mt-20">
+        <p className="text-gray-600">Keranjang kosong 😢</p>
         <button
-          className="mt-5 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow"
           onClick={() => navigate("/")}
+          className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-xl"
         >
-          Belanja Sekarang
+          Belanja
         </button>
       </div>
     );
 
-  const totalPrice = cart.items.reduce(
-    (acc, item) => acc + item.quantity * item.product.price,
-    0
-  );
-
-  /* ================= UI ================= */
-
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 pb-28 md:pb-6 bg-blue-50 min-h-screen">
-      <h1 className="text-2xl font-semibold text-blue-700 mb-5">
-        Keranjang Belanja
-      </h1>
+    <>
+      <div className="max-w-5xl mx-auto px-4 py-6 pb-32 bg-blue-50 min-h-screen">
+        <h1 className="text-2xl font-semibold text-blue-700 mb-4">
+          Keranjang Belanja
+        </h1>
 
-      {/* ITEM LIST */}
-      <div className="space-y-4">
-        {cart.items.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white rounded-xl p-4 shadow-sm border flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-          >
-            {/* LEFT */}
-            <div className="flex items-center gap-4">
-              <img
-                src={item.product.image_url}
-                alt={item.product.name}
-                className="w-20 h-20 object-cover rounded-xl border"
-              />
-
-              <div>
-                <h2 className="font-semibold text-gray-800 text-sm md:text-base">
-                  {item.product.name}
-                </h2>
-                <p className="text-blue-600 font-medium text-sm">
-                  Rp {item.product.price.toLocaleString("id-ID")}
-                </p>
-              </div>
-            </div>
-
-            {/* QTY */}
-            <div className="flex items-center justify-between md:justify-start gap-3">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() =>
-                    updateQty(item.id, Math.max(1, item.quantity - 1))
-                  }
-                  className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center justify-center font-bold"
-                >
-                  -
-                </button>
-
-                <span className="font-semibold text-gray-800 min-w-[24px] text-center">
-                  {item.quantity}
-                </span>
-
-                <button
-                  onClick={() => updateQty(item.id, item.quantity + 1)}
-                  className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 flex items-center justify-center font-bold"
-                >
-                  +
-                </button>
-              </div>
-
-              {/* PRICE + REMOVE (MOBILE INLINE) */}
-              <div className="text-right md:hidden">
-                <p className="font-semibold text-gray-800 text-sm">
-                  Rp{" "}
-                  {(item.product.price * item.quantity).toLocaleString("id-ID")}
-                </p>
-                <button
-                  onClick={() => removeItem(item.id)}
-                  className="text-red-500 text-xs hover:underline"
-                >
-                  Hapus
-                </button>
-              </div>
-            </div>
-
-            {/* PRICE + REMOVE DESKTOP */}
-            <div className="hidden md:flex flex-col items-end">
-              <p className="font-semibold text-gray-800 text-lg">
-                Rp{" "}
-                {(item.product.price * item.quantity).toLocaleString("id-ID")}
+        {/* VALIDATION ERROR */}
+        {validationErrors.length > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+            {validationErrors.map((e, i) => (
+              <p key={i} className="text-red-600 text-sm">
+                • {e.message}
               </p>
-              <button
-                onClick={() => removeItem(item.id)}
-                className="text-red-500 text-sm hover:underline mt-1"
-              >
-                Hapus
-              </button>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        )}
 
-      {/* BOTTOM BAR */}
-      <div className="fixed bottom-13 left-0 right-0 md:static bg-white border-t md:border rounded-t-2xl md:rounded-xl shadow-md p-4 mt-8 flex justify-between items-center gap-4">
-        <button
-          onClick={clearCart}
-          className="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 text-sm"
-        >
-          Kosongkan
-        </button>
+        {/* ITEMS */}
+        <div className="space-y-4">
+          {cart.items.map((item) => {
+            const needPrescription =
+              item.product.is_prescription_required &&
+              !prescriptionAccess[item.product.id];
 
-        <div className="text-right">
-          <p className="font-semibold text-gray-800">
-            Total: Rp {totalPrice.toLocaleString("id-ID")}
-          </p>
+            const outOfStock = item.product.stock < item.quantity;
 
+            return (
+              <div
+                key={item.id}
+                className={`bg-white p-4 rounded-xl shadow border ${
+                  outOfStock ? "border-red-300" : ""
+                }`}
+              >
+                <div className="flex gap-4 items-center">
+                  <img
+                    src={item.product.image_url}
+                    className="w-20 h-20 rounded-xl object-cover"
+                  />
+
+                  <div className="flex-1">
+                    <h2 className="font-semibold">
+                      {item.product.name}
+                    </h2>
+                    <p className="text-blue-600">
+                      Rp {item.product.price.toLocaleString("id-ID")}
+                    </p>
+
+                    {outOfStock && (
+                      <p className="text-xs text-red-500 mt-1">
+                        Stok tidak cukup
+                      </p>
+                    )}
+
+                    {needPrescription && (
+                      <button
+                        onClick={() => {
+                          setSelectedProduct(item.product);
+                          setShowModal(true);
+                        }}
+                        className="mt-2 text-sm text-orange-600 underline"
+                      >
+                        Minta resep ke dokter
+                      </button>
+                    )}
+
+                    {prescriptionAccess[item.product.id] && (
+                      <p className="text-xs text-green-600 mt-1">
+                        ✓ Resep disetujui
+                      </p>
+                    )}
+                  </div>
+
+                  {/* QTY */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() =>
+                        updateQty(item.id, item.quantity - 1)
+                      }
+                      className="w-8 h-8 bg-blue-100 rounded-lg"
+                    >
+                      -
+                    </button>
+                    <span>{item.quantity}</span>
+                    <button
+                      onClick={() =>
+                        updateQty(item.id, item.quantity + 1)
+                      }
+                      className="w-8 h-8 bg-blue-100 rounded-lg"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="text-red-500 text-sm"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* FOOTER */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-between">
           <button
-            onClick={() => navigate("/checkout")}
-            className="mt-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow"
+            onClick={clearCart}
+            className="bg-blue-100 px-4 py-2 rounded-xl"
           >
-            Checkout
+            Kosongkan
           </button>
+
+          <div className="text-right">
+            <p className="font-semibold">
+              Total: Rp {totalPrice.toLocaleString("id-ID")}
+            </p>
+            <button
+              disabled={!canCheckout || validating}
+              onClick={handleCheckout}
+              className={`mt-2 px-6 py-3 rounded-xl text-white ${
+                canCheckout
+                  ? "bg-blue-600"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              {validating ? "Memvalidasi..." : "Checkout"}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* MODAL */}
+      <RequestPrescriptionModal
+        isOpen={showModal}
+        product={selectedProduct}
+        onClose={() => setShowModal(false)}
+        onSuccess={fetchCart}
+      />
+    </>
   );
 }
