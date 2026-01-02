@@ -7,6 +7,7 @@ import MedicineLanding from '@/components/MedicineLanding'
 import PromoCarousel from '@/components/LandingSlider'
 import TestimonialCarousel from '@/components/LandingTestimoni'
 import { useLocation } from 'react-router-dom'
+import FloatingWhatsapp from '@/components/FloatingWhatsapp'
 
 const HomePages = () => {
   
@@ -18,6 +19,7 @@ const HomePages = () => {
     <MedicineLanding/>
     <PromoCarousel/>
     <TestimonialCarousel/>
+    <FloatingWhatsapp/>
     
  <Footer/>
     </>

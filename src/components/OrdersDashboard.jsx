@@ -177,12 +177,7 @@ setPayment(response.data.session.session_data.data);
             </div>
 
             <div className="mt-4 md:mt-0 md:ml-4 flex items-center gap-2">
-              <Link
-                // to={`/orders/${order.id}`}
-                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm"
-              >
-                Detail
-              </Link>
+              
               {order.status === "pending" && (
                 <button
                   onClick={() => handlePay(order.id)}

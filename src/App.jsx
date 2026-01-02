@@ -25,6 +25,7 @@ import AboutUsPages from './pages/AboutUsPages'
 import ServicesPages from './pages/ServicesPages'
 import ContactPages from './pages/ContactPages'
 import DoctorListPages from './pages/DoctorListPages'
+import VerifyEmail from './pages/VerifyOtpPages'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -54,6 +55,9 @@ function App() {
         <Route path="/about-us" element={<AboutUsPages/>}/>
         <Route path="/layanan" element={<ServicesPages/>}/>
         <Route path="/contact" element={<ContactPages/>}/>
+        <Route path="/verify-account" element={<VerifyEmail/>}/>
+
+        
 
 
 

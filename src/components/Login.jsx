@@ -1,37 +1,56 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Mail, Lock, AlertCircle, Clock, LogIn, Chrome } from "lucide-react";
 
 const Login = () => {
   const [params] = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ===============================
-  // GOOGLE LOGIN CALLBACK HANDLER
-  // ===============================
+  const [lockUntil, setLockUntil] = useState(
+    Number(localStorage.getItem("lock_until")) || null
+  );
+  const [remaining, setRemaining] = useState(0);
+
+  // GOOGLE LOGIN CALLBACK
   useEffect(() => {
     const token = params.get("token");
-
     if (token) {
-      // Simpan token ke localStorage
       localStorage.setItem("token", token);
-
-      // Bersihkan query biar URL rapi
       window.history.replaceState({}, "", "/login");
-
-      // Redirect otomatis
       window.location.href = "/";
     }
   }, [params]);
 
-  // ===============================
-  // LOGIN FORM HANDLER
-  // ===============================
+  // COUNTDOWN HANDLER
+  useEffect(() => {
+    if (!lockUntil) return;
+
+    const interval = setInterval(() => {
+      const diff = Math.floor((lockUntil - Date.now()) / 1000);
+
+      if (diff <= 0) {
+        localStorage.removeItem("lock_until");
+        setLockUntil(null);
+        setRemaining(0);
+      } else {
+        setRemaining(diff);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lockUntil]);
+
+  // LOGIN HANDLER
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (lockUntil) return;
+
     setLoading(true);
     setError("");
 
@@ -47,111 +66,179 @@ const Login = () => {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setError(data.message || "Login gagal!");
+      // BACKEND LOCK RESPONSE
+      if (data.locked) {
+        const lockTime = Date.now() + 5 * 60 * 1000;
+        localStorage.setItem("lock_until", lockTime);
+        setLockUntil(lockTime);
+        setError(data.message);
         setLoading(false);
         return;
       }
 
-      // Simpan token
-      localStorage.setItem("token", data.token);
+      if (!res.ok) {
+        setError(data.message || "Login gagal");
+        setLoading(false);
+        return;
+      }
 
-      // Redirect ke dashboard
+      // SUCCESS
+      localStorage.removeItem("lock_until");
+      localStorage.setItem("token", data.token);
       window.location.href = "/";
+
     } catch (err) {
       console.error(err);
-      setError("Server Error. Coba lagi nanti.");
+      setError("Server error. Coba lagi nanti.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-blue-200 px-4">
-      <div className="w-full max-w-md bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-blue-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
+      {/* Container */}
+      <div className="w-full max-w-md">
+        {/* Logo/Brand Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-600 rounded-2xl mb-4 shadow-lg">
+            <LogIn className="w-6 h-6 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Selamat Datang</h1>
+        </div>
 
-        <h2 className="text-3xl font-semibold text-blue-700 text-center mb-6">
-          KlinikCare Login
-        </h2>
-        <p className="text-center text-sm text-gray-600 mb-6">
-          Masuk untuk mengelola layanan dan pasien
-        </p>
-
-        <form onSubmit={handleLogin} className="space-y-5">
-
-          {error && (
-            <p className="text-red-600 text-sm bg-red-50 p-2 rounded-lg border border-red-200">
-              {error}
-            </p>
+        {/* Main Card */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+          {/* Lock Warning */}
+          {lockUntil && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6">
+              <Clock className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-red-900">Akun Terkunci</p>
+                <p className="text-sm text-red-700 mt-1">
+                  Coba lagi dalam <span className="font-semibold">{remaining} detik</span>
+                </p>
+              </div>
+            </div>
           )}
 
-          <div>
-            <label className="text-sm text-gray-700 font-medium">Email</label>
-            <input
-              type="email"
-              required
-              placeholder="Masukkan Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full mt-1 p-3 rounded-lg border border-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-blue-400 
-              focus:border-blue-400 transition"
-            />
+          {/* Error Message */}
+          {error && !lockUntil && (
+            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-5">
+            {/* Email Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                  <Mail className="w-5 h-5 text-gray-400" />
+                </div>
+                <input
+                  type="email"
+                  required
+                  disabled={lockUntil}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="nama@email.com"
+                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                  <Lock className="w-5 h-5 text-gray-400" />
+                </div>
+                <input
+                  type="password"
+                  required
+                  disabled={lockUntil}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Masukkan password"
+                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Login Button */}
+            <button
+              type="submit"
+              disabled={loading || lockUntil}
+              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors shadow-lg hover:shadow-xl"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Memproses...</span>
+                </>
+              ) : (
+                <>
+                  <LogIn className="w-5 h-5" />
+                  <span>Masuk</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Atau masuk dengan</span>
+            </div>
           </div>
 
-          <div>
-            <label className="text-sm text-gray-700 font-medium">Password</label>
-            <input
-              type="password"
-              required
-              placeholder="Masukkan Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full mt-1 p-3 rounded-lg border border-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-blue-400 
-              focus:border-blue-400 transition"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 
-            text-white font-medium p-3 rounded-lg transition shadow-md 
-            disabled:opacity-50"
+          {/* Google Login */}
+          <a
+            href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
+            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-xl border-2 border-gray-300 transition-colors"
           >
-            {loading ? "Loading..." : "Login"}
-          </button>
-        </form>
+            <Chrome className="w-5 h-5 text-red-500" />
+            <span>Lanjutkan dengan Google</span>
+          </a>
 
-        {/* ================================
-            GOOGLE LOGIN BUTTON
-        ================================ */}
-        <a
-          href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
-          className="bg-red-500 text-white px-4 py-2 rounded block text-center mt-6"
-        >
-          Login with Google
-        </a>
+          {/* Footer Links */}
+          <div className="mt-6 text-center">
+            {!error ? (
+              <p className="text-sm text-gray-600">
+                Belum punya akun?{" "}
+                <a href="/register" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
+                  Daftar di sini
+                </a>
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600">
+                Lupa kata sandi?{" "}
+                <a href="/recovery" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
+                  Pulihkan di sini
+                </a>
+              </p>
+            )}
+          </div>
+        </div>
 
-        {!error ? (
-          <p className="text-center text-xs text-black mt-6">
-            belum punya akun?{" "}
-            <a href="/register" className="text-blue-400">
-              daftar di sini
-            </a>
-          </p>
-        ) : (
-          <p className="text-center text-xs text-black mt-6">
-            lupa kata sandi? pulihkan{" "}
-            <a href="/recovery" className="text-blue-400">
-              di sini
-            </a>
-          </p>
-        )}
-
-        <p className="text-center text-xs text-gray-500 mt-6">
-          © 2025 KlinikCare — All Rights Reserved
+        {/* Bottom Text */}
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Dengan masuk, Anda menyetujui{" "}
+          <a href="/terms" className="text-blue-600 hover:underline">
+            Syarat & Ketentuan
+          </a>
         </p>
       </div>
     </div>

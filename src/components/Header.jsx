@@ -101,7 +101,7 @@ const Header = () => {
               <span className="sm:hidden">📞 0811-8000-2350</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="hidden sm:inline">Jam Operasional: 24/7</span>
+              <span className="hidden sm:inline">Jam Operasional: 24/7 CS</span>
             </div>
           </div>
         </div>

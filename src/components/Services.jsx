@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import { ChevronLeftIcon, ChevronRightIcon, SparklesIcon } from "@heroicons/react/24/solid";
+import { ChevronLeft, ChevronRight, Sparkles, CheckCircle } from "lucide-react";
 
 export default function Services() {
+  const [mainServices, setMainServices] = useState([]);
   const [otherServices, setOtherServices] = useState([]);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const autoplayRef = useRef(null);
@@ -10,17 +10,22 @@ export default function Services() {
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    // Ambil semua layanan dari backend
-    axios
-      .get(`${API_URL}/api/service`)
-      .then((res) => {
-        const filtered = res.data.filter(
+    fetch(`${API_URL}/api/clinic-profile`)
+      .then(res => res.json())
+      .then((data) => {
+        const serviceCards = data.serviceCards || [];
+        setMainServices(serviceCards);
+      })
+      .catch((err) => console.error("Gagal fetch clinic profile:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/service`)
+      .then(res => res.json())
+      .then((data) => {
+        const filtered = data.filter(
           (s) =>
-            ![
-              "Ibu & Kehamilan",
-              "Reparasi Vagina",
-              "Tumbuh Kembang Anak",
-            ].includes(s.name)
+            !["Ibu & Kehamilan", "Reparasi Vagina", "Tumbuh Kembang Anak"].includes(s.name)
         );
         setOtherServices(filtered);
       })
@@ -34,7 +39,6 @@ export default function Services() {
   const next = () =>
     setCarouselIndex((prevIdx) => (otherServices.length ? (prevIdx + 1) % otherServices.length : 0));
 
-  // autoplay carousel
   useEffect(() => {
     if (!otherServices.length) return;
     autoplayRef.current = setInterval(() => {
@@ -43,151 +47,193 @@ export default function Services() {
     return () => clearInterval(autoplayRef.current);
   }, [otherServices.length]);
 
-  // paths for images (put these files in public/images)
-  const POLI_IMAGE = "Poli-Umum.jpg"; // requested image for carousel
-  const IMG_PREGNANCY = "/images/pregnancy.jpg"; // optional: illustration for mother & pregnancy
-  const IMG_REPAIR = "/images/repair.jpg"; // optional: illustration for vaginal repair / pelvic floor
-  const IMG_CHILD = "/images/child-development.jpg"; // optional: child development illustration
+  const POLI_IMAGE = "Poli-Umum.jpg";
 
   return (
-    <div className="bg-gray-50 text-gray-800">
-      {/* HERO with subtle image + shimmer */}
-      <section
-        className="relative bg-gradient-to-r from-blue-600 to-blue-400 text-white py-24 overflow-hidden"
-        aria-label="Hero layanan"
-      >
-        <div className="absolute inset-0 opacity-10">
-          <img src={POLI_IMAGE} alt="Poli Umum background" className="w-full h-full object-cover" />
-        </div>
+    <div className="bg-white text-gray-800 min-h-screen">
+      {/* HERO */}
+      <section className="relative bg-blue-600 text-white py-20 md:py-28">
+        <div className="absolute inset-0 bg-blue-700 opacity-10"></div>
         <div className="relative max-w-6xl mx-auto px-6 text-center">
-          <SparklesIcon className="w-12 h-12 mx-auto mb-4 text-white/90" />
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg">Layanan Klinik Desidua</h1>
-          <p className="text-lg md:text-xl max-w-3xl mx-auto drop-shadow-sm">
-            Klinik ramah keluarga: komprehensif, berbasis bukti, dan peduli terhadap perjalanan ibu & anak — dari
-            pemeriksaan rutin sampai intervensi spesialis.
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-6">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Layanan Klinik Desidua</h1>
+          <p className="text-lg md:text-xl max-w-3xl mx-auto text-blue-50">
+            Klinik ramah keluarga: komprehensif, berbasis bukti, dan peduli terhadap perjalanan ibu & anak.
           </p>
         </div>
       </section>
 
-      {/* 3 Layanan Utama - lebih visual dan informatif */}
-      <section className="py-16 max-w-7xl mx-auto px-6">
-        <h2 className="text-3xl font-semibold text-blue-700 mb-8 text-center">Layanan Utama Kami</h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Ibu & Kehamilan */}
-          <article className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col">
-            <img src={IMG_PREGNANCY} alt="Ibu & Kehamilan" className="rounded-lg w-full h-44 object-cover mb-4" />
-            <h3 className="text-xl font-semibold text-blue-700 mb-2">Ibu & Kehamilan</h3>
-            <div className="prose text-sm text-gray-700">
-              <p>
-                Layanan antenatal komprehensif meliputi skrining risiko, pemeriksaan tekanan darah, pemeriksaan
-                kebugaran janin, konseling nutrisi, serta manajemen komplikasi awal. Kami mengikuti prinsip-prinsip
-                perawatan berbasis bukti untuk mengoptimalkan hasil perinatal dan pengalaman ibu selama kehamilan.
-              </p>
-              <p className="text-xs text-gray-500">(Rujukan ilmiah tersedia di bagian bawah.)</p>
-            </div>
-          </article>
-
-          {/* Reparasi Vagina */}
-          <article className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col">
-            <img src={IMG_REPAIR} alt="Reparasi Vagina" className="rounded-lg w-full h-44 object-cover mb-4" />
-            <h3 className="text-xl font-semibold text-blue-700 mb-2">Reparasi Vagina & Kesehatan Intim</h3>
-            <div className="prose text-sm text-gray-700">
-              <p>
-                Penanganan gangguan panggul (mis. prolaps, robekan persalinan, disfungsi dasar panggul) dengan opsi
-                konservatif (fisioterapi dasar panggul, pessary) sampai intervensi bedah rekonstruktif bila
-                diperlukan. Pendekatan kami menekankan fungsi jangka panjang dan kualitas hidup.
-              </p>
-              <p className="text-xs text-gray-500">(Rujukan ilmiah tersedia di bagian bawah.)</p>
-            </div>
-          </article>
-
-          {/* Tumbuh Kembang Anak */}
-          <article className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition flex flex-col">
-            <img src={IMG_CHILD} alt="Tumbuh Kembang Anak" className="rounded-lg w-full h-44 object-cover mb-4" />
-            <h3 className="text-xl font-semibold text-blue-700 mb-2">Tumbuh Kembang Anak</h3>
-            <div className="prose text-sm text-gray-700">
-              <p>
-                Pemantauan pertumbuhan menggunakan standar WHO, penilaian milestone perkembangan, konseling
-                nutrisi, dan rujukan dini ke layanan perkembangan bila ditemukan keterlambatan. Intervensi dini dapat
-                mengubah trajektori perkembangan anak secara signifikan.
-              </p>
-              <p className="text-xs text-gray-500">(Rujukan ilmiah tersedia di bagian bawah.)</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      {/* Layanan Umum / Lainnya + Carousel visual */}
-      <section className="py-12 bg-blue-50">
-        <div className="max-w-7xl mx-auto px-6 text-center mb-6">
-          <h2 className="text-3xl font-semibold text-blue-700">Layanan Lainnya</h2>
-          <p className="mt-4 text-gray-700 max-w-2xl mx-auto">
-            Selain layanan utama, kami menyediakan layanan umum: pemeriksaan umum, imunisasi, konseling keluarga, dan
-            skrining kesehatan berkala.
+      {/* Program Unggulan - Alternating Layout */}
+      <section className="py-16 md:py-24 max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Program Unggulan Kami</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Layanan terbaik yang dirancang khusus untuk kesehatan dan kesejahteraan keluarga Anda
           </p>
         </div>
 
-        {/* Carousel */}
-        {otherServices.length > 0 ? (
-          <div className="relative max-w-4xl mx-auto">
-            <div className="overflow-hidden rounded-2xl shadow-lg bg-white">
-              <div
-                className="flex transition-transform duration-500"
-                style={{ transform: `translateX(-${carouselIndex * 100}%)` }}
-              >
-                {otherServices.map((service) => (
-                  <div key={service.id} className="flex-shrink-0 w-full p-8 flex gap-6 items-center">
-                    {/* use the same Poli-Umum.jpg as requested */}
-                    <img src={POLI_IMAGE} alt={service.name} className="w-40 h-32 object-cover rounded-lg shadow-sm" />
-                    <div className="text-left">
-                      <h3 className="text-xl font-semibold text-blue-700 mb-2">{service.name}</h3>
-                      <p className="text-sm text-gray-700 truncate">{service.description}</p>
+        <div className="space-y-20">
+          {mainServices.map((service, index) => (
+            <article 
+              key={service.title}
+              className={`flex flex-col ${
+                index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+              } gap-8 md:gap-12 items-center`}
+            >
+              {/* Image Side */}
+              <div className="w-full md:w-1/2">
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-blue-600 rounded-3xl transform rotate-3 group-hover:rotate-6 transition-transform duration-300"></div>
+                  <img
+                    src={service.image || "/images/default-service.jpg"}
+                    alt={service.title}
+                    className="relative rounded-3xl w-full h-80 md:h-96 object-cover shadow-2xl"
+                  />
+                </div>
+              </div>
+
+              {/* Content Side */}
+              <div className="w-full md:w-1/2 space-y-6">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold">
+                  <CheckCircle className="w-4 h-4" />
+                  Program Unggulan
+                </div>
+                
+                <h3 className="text-3xl md:text-4xl font-bold text-gray-900">
+                  {service.title}
+                </h3>
+                
+                <div className="w-16 h-1 bg-blue-600 rounded-full"></div>
+                
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  {service.description}
+                </p>
+
+                <div className="pt-4">
+                  <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-lg hover:shadow-xl">
+                    Pelajari Lebih Lanjut
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* Carousel Layanan Lain */}
+      <section className="py-16 md:py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Layanan Lainnya</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Selain layanan utama, kami menyediakan berbagai layanan umum, pemeriksaan, imunisasi, dan konseling keluarga
+            </p>
+          </div>
+
+          {otherServices.length > 0 ? (
+            <div className="relative max-w-5xl mx-auto">
+              {/* Carousel Container */}
+              <div className="overflow-hidden rounded-2xl bg-white shadow-xl">
+                <div
+                  className="flex transition-transform duration-700 ease-in-out"
+                  style={{ transform: `translateX(-${carouselIndex * 100}%)` }}
+                >
+                  {otherServices.map((service) => (
+                    <div 
+                      key={service.id} 
+                      className="flex-shrink-0 w-full"
+                    >
+                      <div className="flex flex-col md:flex-row gap-8 p-8 md:p-12 items-center">
+                        {/* Image */}
+                        <div className="w-full md:w-2/5">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-blue-500 rounded-2xl transform -rotate-2"></div>
+                            <img 
+                              src={POLI_IMAGE} 
+                              alt={service.name}
+                              className="relative rounded-2xl w-full h-64 md:h-72 object-cover shadow-lg"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="w-full md:w-3/5 space-y-4">
+                          <div className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold">
+                            Layanan Umum
+                          </div>
+                          
+                          <h3 className="text-2xl md:text-3xl font-bold text-gray-900">
+                            {service.name}
+                          </h3>
+                          
+                          <p className="text-gray-600 leading-relaxed">
+                            {service.description}
+                          </p>
+
+                          <div className="flex items-center gap-3 pt-2">
+                            <div className="flex items-center gap-1">
+                              <CheckCircle className="w-5 h-5 text-blue-600" />
+                              <span className="text-sm text-gray-700">Profesional</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <CheckCircle className="w-5 h-5 text-blue-600" />
+                              <span className="text-sm text-gray-700">Terpercaya</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Navigation Buttons */}
+              <button 
+                onClick={prev}
+                className="absolute top-1/2 -left-4 md:-left-6 transform -translate-y-1/2 w-12 h-12 bg-white hover:bg-blue-600 text-blue-600 hover:text-white rounded-full shadow-xl flex items-center justify-center transition-all duration-300 group"
+                aria-label="Previous service"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              
+              <button 
+                onClick={next}
+                className="absolute top-1/2 -right-4 md:-right-6 transform -translate-y-1/2 w-12 h-12 bg-white hover:bg-blue-600 text-blue-600 hover:text-white rounded-full shadow-xl flex items-center justify-center transition-all duration-300 group"
+                aria-label="Next service"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+
+              {/* Dots Indicator */}
+              <div className="flex justify-center gap-2 mt-8">
+                {otherServices.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCarouselIndex(index)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      index === carouselIndex 
+                        ? 'w-8 bg-blue-600' 
+                        : 'w-2 bg-gray-300 hover:bg-gray-400'
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
                 ))}
               </div>
             </div>
-
-            {/* Navigation */}
-            <button
-              onClick={prev}
-              className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-blue-700 text-white p-2 rounded-full shadow-lg hover:bg-blue-800 transition"
-              aria-label="Previous"
-            >
-              <ChevronLeftIcon className="w-5 h-5" />
-            </button>
-            <button
-              onClick={next}
-              className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-blue-700 text-white p-2 rounded-full shadow-lg hover:bg-blue-800 transition"
-              aria-label="Next"
-            >
-              <ChevronRightIcon className="w-5 h-5" />
-            </button>
-
-            {/* indicators */}
-            <div className="flex gap-2 justify-center mt-4">
-              {otherServices.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCarouselIndex(i)}
-                  className={`w-3 h-3 rounded-full ${i === carouselIndex ? "bg-blue-700" : "bg-gray-300"}`}
-                  aria-label={`Go to slide ${i + 1}`}
-                />
-              ))}
+          ) : (
+            <div className="max-w-5xl mx-auto">
+              <div className="rounded-2xl bg-white p-12 text-center shadow-xl">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-gray-600">Tidak ada layanan lain yang tersedia saat ini.</p>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="max-w-4xl mx-auto">
-            <div className="rounded-2xl shadow-lg bg-white p-8">
-              <p className="text-center text-gray-600">Tidak ada layanan lain yang ditemukan.</p>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </section>
-
-      <footer className="mt-12">
-        <div className="h-24 bg-blue-700"></div>
-      </footer>
     </div>
   );
 }

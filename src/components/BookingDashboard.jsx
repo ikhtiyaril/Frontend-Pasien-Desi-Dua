@@ -180,13 +180,7 @@ setPayment(response.data.session.session_data.data);
             {/* BUTTON GROUP */}
             <div className="mt-4 md:mt-0 flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
 
-              <Link
-                // to={`/booking/${b.id}`}
-                className="px-4 py-2 bg-indigo-600 w-full md:w-auto text-center text-white rounded-lg hover:bg-indigo-700 text-sm"
-              >
-                Detail
-              </Link>
-
+              
               {b.status === "pending" && (
                 <button
                   onClick={()=>handlePay(b.id)}
