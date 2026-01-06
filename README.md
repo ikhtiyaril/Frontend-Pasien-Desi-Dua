@@ -1,1 +1,1 @@
-Online Websitenya = htps://desidua.cloud
+Online Websitenya = https://desidua.cloud
