@@ -291,10 +291,10 @@ export default function DoctorList() {
             Tim dokter kami siap membantu Anda 24/7. Jadwalkan konsultasi sekarang!
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl">
-              Buat Janji Temu
+            <button onClick={()=>navigate('/booking')} className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl">
+              Konsultasi Sekarang
             </button>
-            <button className="px-8 py-4 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-400 transition-all border-2 border-white/30">
+            <button onClick={()=>navigate('/contact')} className="px-8 py-4 bg-blue-500 text-white rounded-xl font-semibold hover:bg-blue-400 transition-all border-2 border-white/30">
               Hubungi Kami
             </button>
           </div>

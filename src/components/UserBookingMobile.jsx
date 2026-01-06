@@ -450,7 +450,7 @@ export default function UserBookingMobile() {
             <option value="1">-- Pilih Layanan --</option>
             {services.map((s) => (
               <option key={s.id} value={s.id}>
-                {s.name}
+                {s.name} {s.is_live ? "(Online)" : "(Offline)"}
               </option>
             ))}
           </select>

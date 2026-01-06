@@ -6,6 +6,8 @@ import { Calculator } from "lucide-react";
 import PaymentFeeCalculator from "./CalculatorPayment";
 import FloatingPayment from "./FloatingPayment";
 import { Clock, DollarSign, Video, Stethoscope, Star, Calendar, CheckCircle, ChevronRight } from 'lucide-react';
+import BookingService from "./BookingService";
+import BookingDoctorCard from "./BookingDoctorCard";
 
 
 
@@ -413,7 +415,7 @@ const calculatorPrice = async () =>{
 
         {/* NOTES */}
         <div className="mb-4">
-          <label className="font-medium text-blue-800">Catatan</label>
+          <label className="font-medium text-blue-800">Keluhan</label>
           <textarea
             className="w-full mt-1 p-2 border rounded-lg"
             value={form.notes}
@@ -448,100 +450,11 @@ const calculatorPrice = async () =>{
 
     <div className="grid grid-cols-1 gap-4">
       {services.map((s) => (
-        <div
-          key={s.id}
-          className="group relative bg-white rounded-2xl border-2 border-blue-100 overflow-hidden cursor-pointer transition-all duration-300 hover:border-blue-400 hover:shadow-xl hover:-translate-y-1"
-          onClick={() => chooseService(s)}
-        >
-          {/* Accent bar */}
-          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-blue-600 transform scale-y-0 group-hover:scale-y-100 transition-transform duration-300" />
-          
-          <div className="p-5 flex gap-5">
-            {/* Image with overlay effect */}
-            <div className="relative shrink-0">
-              <div className="absolute inset-0 bg-blue-600 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
-              <img
-                className="w-24 h-24 rounded-xl object-cover shadow-md border-2 border-blue-100 group-hover:border-blue-300 transition-all"
-                src="/Poli-Umum.jpg"
-                alt={s.name}
-              />
-              {/* Service type badge */}
-              <div className={`absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${
-                s.is_live ? 'bg-gradient-to-br from-purple-500 to-purple-600' : 'bg-gradient-to-br from-blue-500 to-blue-600'
-              }`}>
-                {s.is_live ? (
-                  <Video className="w-4 h-4 text-white" />
-                ) : (
-                  <Stethoscope className="w-4 h-4 text-white" />
-                )}
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <h3 className="font-bold text-gray-900 text-xl leading-tight group-hover:text-blue-700 transition-colors">
-                    {s.name}
-                  </h3>
-                  <ChevronRight className="w-6 h-6 text-blue-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0" />
-                </div>
-
-                <p className="text-sm text-gray-600 leading-relaxed line-clamp-2 mb-3">
-                  {s.description}
-                </p>
-
-                {/* Service type badge */}
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-                  s.is_live 
-                    ? 'bg-purple-100 text-purple-700' 
-                    : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {s.is_live ? (
-                    <>
-                      <Video className="w-3.5 h-3.5" />
-                      Video Call
-                    </>
-                  ) : (
-                    <>
-                      <Stethoscope className="w-3.5 h-3.5" />
-                      Layanan Normal
-                    </>
-                  )}
-                </span>
-              </div>
-
-              {/* Info row */}
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
-                {/* Duration */}
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Durasi</p>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {s.duration_minutes} menit
-                    </p>
-                  </div>
-                </div>
-
-                {/* Price */}
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                    <DollarSign className="w-4 h-4 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Biaya</p>
-                    <p className="text-sm font-bold text-green-600">
-                      {s.price ? `Rp ${Number(s.price).toLocaleString()}` : "Gratis"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+       <BookingService
+      key={s.id}
+      service={s}
+      onSelect={chooseService}
+    />
       ))}
     </div>
   </div>
@@ -561,93 +474,12 @@ const calculatorPrice = async () =>{
       {doctors
         .filter((d) => selectedService?.doctorIds?.includes(d.id))
         .map((doc) => (
-          <div
+         <BookingDoctorCard
             key={doc.id}
-            onClick={() => chooseDoctor(doc)}
-            className="group relative bg-white rounded-2xl border-2 border-blue-100 overflow-hidden cursor-pointer transition-all duration-300 hover:border-blue-400 hover:shadow-xl hover:-translate-y-1"
-          >
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            
-            <div className="relative p-6">
-              {/* Header with avatar */}
-              <div className="flex items-start gap-4 mb-4">
-                <div className="relative">
-                  <img
-                    src={doc.avatar || "https://via.placeholder.com/100"}
-                    alt={doc.name}
-                    className="w-20 h-20 rounded-2xl object-cover border-2 border-blue-100 group-hover:border-blue-300 transition-all shadow-md"
-                  />
-                  {/* Status indicator */}
-                  <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-3 border-white flex items-center justify-center ${
-                    doc.isActive ? 'bg-green-500' : 'bg-gray-400'
-                  }`}>
-                    <CheckCircle className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-700 transition-colors">
-                    {doc.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {doc.specialization}
-                  </p>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                        />
-                      ))}
-                    </div>
-                    <span className="text-xs text-gray-500 font-medium">(2 reviews)</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent my-4" />
-
-              {/* Info cards */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                {/* Price card */}
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-3 border border-blue-200">
-                  <div className="flex items-center gap-2 mb-1">
-                    <DollarSign className="w-4 h-4 text-blue-600" />
-                    <p className="text-xs text-gray-600 font-medium">Biaya Konsultasi</p>
-                  </div>
-                  <p className="text-lg font-bold text-blue-700">
-                    {selectedService.price ? `Rp ${Number(selectedService.price).toLocaleString()}` : "Gratis"}
-                  </p>
-                </div>
-
-                {/* Availability card */}
-                <div className={`rounded-xl p-3 border ${
-                  doc.isActive 
-                    ? 'bg-gradient-to-br from-green-50 to-green-100/50 border-green-200' 
-                    : 'bg-gradient-to-br from-gray-50 to-gray-100/50 border-gray-200'
-                }`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Calendar className={`w-4 h-4 ${doc.isActive ? 'text-green-600' : 'text-gray-600'}`} />
-                    <p className="text-xs text-gray-600 font-medium">Status</p>
-                  </div>
-                  <p className={`text-sm font-bold ${doc.isActive ? 'text-green-700' : 'text-gray-700'}`}>
-                    {doc.isActive ? "Tersedia" : "Tidak Tersedia"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Action button */}
-              <button className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 group-hover:gap-3">
-                Pilih Dokter
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+            doctor={doc}
+            service={selectedService}
+            onSelect={chooseDoctor}
+          />
         ))}
     </div>
   </div>

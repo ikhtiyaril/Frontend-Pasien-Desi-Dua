@@ -55,8 +55,8 @@ export default function Services() {
       <section className="relative bg-blue-600 text-white py-20 md:py-28">
         <div className="absolute inset-0 bg-blue-700 opacity-10"></div>
         <div className="relative max-w-6xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-6">
-            <Sparkles className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 rounded-2xl mb-6">
+            <img src="Desi Dua Putih.png" alt="" className="h-20 w-20" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Layanan Klinik Desidua</h1>
           <p className="text-lg md:text-xl max-w-3xl mx-auto text-blue-50">

@@ -14,7 +14,12 @@ import {
   MapPin
 } from "lucide-react";
 
+import { useNavigate } from "react-router-dom";
+
 export default function AboutUs() {
+const navigate = useNavigate()
+
+
   return (
     <div className="bg-gradient-to-br from-blue-50 via-white to-slate-50">
       {/* Hero Section */}
@@ -37,18 +42,21 @@ export default function AboutUs() {
           </div>
 
           {/* Hero Image */}
-          <div className="relative max-w-5xl mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-700 to-transparent rounded-3xl"></div>
-            <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-white/30">
-              <div className="aspect-video bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                <div className="text-center">
-                  <Heart className="w-24 h-24 text-blue-600 mx-auto mb-4" />
-                  <p className="text-2xl font-bold text-blue-700">Klinik Desidua</p>
-                  <p className="text-blue-600">Your Healthcare Partner</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="relative max-w-5xl mx-auto">
+  {/* Gradient Overlay */}
+  <div className="absolute inset-0 bg-gradient-to-t from-blue-700/40 via-blue-600/10 to-transparent rounded-3xl pointer-events-none" />
+
+  <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/40">
+    <div className="aspect-video relative">
+      <img
+        src="Footage-3-DD.jpeg"
+        alt="Dokter Severina Adella"
+        className="absolute inset-0  w-full h-full object-cover"
+      />
+    </div>
+  </div>
+</div>
+
         </div>
       </section>
 
@@ -145,12 +153,13 @@ export default function AboutUs() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-blue-700/20 rounded-3xl transform rotate-3"></div>
               <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-100">
-                <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 via-blue-50 to-slate-100 flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <Shield className="w-32 h-32 text-blue-600 mx-auto mb-4" />
-                    <p className="text-xl font-bold text-blue-700">Filosofi Perlindungan</p>
-                    <p className="text-gray-600 mt-2">Melindungi & Mendukung Kehidupan</p>
-                  </div>
+                <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 via-blue-50 to-slate-100 flex items-center justify-center relative">
+                  
+      <img
+        src="Footage-2-DD.jpeg"
+        alt="Dokter Severina Adella"
+        className="absolute inset-0  w-full h-full object-cover"
+      />
                 </div>
               </div>
             </div>
@@ -166,12 +175,12 @@ export default function AboutUs() {
             <div className="order-2 lg:order-1 relative">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-blue-700/20 rounded-3xl transform -rotate-3"></div>
               <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-100">
-                <div className="aspect-[4/3] bg-gradient-to-br from-slate-100 via-blue-50 to-blue-100 flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <BookOpen className="w-32 h-32 text-blue-600 mx-auto mb-4" />
-                    <p className="text-xl font-bold text-blue-700">Perjalanan Kami</p>
-                    <p className="text-gray-600 mt-2">Sejak Awal Hingga Kini</p>
-                  </div>
+                <div className=" realative aspect-[4/3] bg-gradient-to-br from-slate-100 via-blue-50 to-blue-100 flex items-center justify-center">
+                  <img
+        src="Footage-4-DD.jpeg"
+        alt="Dokter Severina Adella"
+        className="absolute inset-0  w-full h-full object-cover"
+      />
                 </div>
               </div>
             </div>
@@ -211,83 +220,82 @@ export default function AboutUs() {
 
       {/* Layanan Unggulan */}
       <section className="py-20 bg-gradient-to-br from-blue-50 to-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full mb-6">
-              <Heart className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-semibold text-blue-700">Layanan Kami</span>
-            </div>
-            
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Layanan Unggulan
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Kami menawarkan layanan holistik untuk ibu dan anak, mulai dari kesehatan reproduksi hingga tumbuh kembang anak
-            </p>
-          </div>
+        <div className="grid md:grid-cols-3 gap-8">
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Service Card 1 */}
-            <div className="group bg-white rounded-2xl border-2 border-blue-100 overflow-hidden hover:border-blue-400 hover:shadow-xl transition-all duration-300">
-              <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent"></div>
-                <Heart className="w-20 h-20 text-blue-600 relative z-10 group-hover:scale-110 transition-transform" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Ibu & Kehamilan
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Pemeriksaan kehamilan, konsultasi reproduksi, serta perawatan pasca persalinan dengan pendekatan holistik dan aman.
-                </p>
-                <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm group-hover:gap-2 transition-all">
-                  <span>Pelajari Lebih Lanjut</span>
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                </div>
-              </div>
-            </div>
+  {/* Service Card 1 */}
+  <div className="group bg-white rounded-2xl border-2 border-blue-100 overflow-hidden hover:border-blue-400 hover:shadow-xl transition-all duration-300">
+    <div className="relative h-48 overflow-hidden">
+      <img
+        src="Ibu-Hamil.webp"
+        alt="Ibu dan Kehamilan"
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-700/30 to-transparent"></div>
+    </div>
+    <div className="p-6">
+      <h3 className="text-xl font-bold text-gray-900 mb-3">
+        Ibu & Kehamilan
+      </h3>
+      <p className="text-gray-600 leading-relaxed">
+        Pemeriksaan kehamilan, konsultasi reproduksi, serta perawatan pasca persalinan dengan pendekatan holistik dan aman.
+      </p>
+      <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm group-hover:gap-2 transition-all">
+        <span>Pelajari Lebih Lanjut</span>
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+      </div>
+    </div>
+  </div>
 
-            {/* Service Card 2 */}
-            <div className="group bg-white rounded-2xl border-2 border-blue-100 overflow-hidden hover:border-blue-400 hover:shadow-xl transition-all duration-300">
-              <div className="h-48 bg-gradient-to-br from-slate-100 to-blue-100 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent"></div>
-                <Shield className="w-20 h-20 text-blue-600 relative z-10 group-hover:scale-110 transition-transform" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Kesehatan Intim
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Reparasi vagina dan perawatan kesehatan intim untuk memulihkan fungsi, kenyamanan, dan kepercayaan diri perempuan.
-                </p>
-                <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm group-hover:gap-2 transition-all">
-                  <span>Pelajari Lebih Lanjut</span>
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                </div>
-              </div>
-            </div>
+  {/* Service Card 2 */}
+  <div className="group bg-white rounded-2xl border-2 border-blue-100 overflow-hidden hover:border-blue-400 hover:shadow-xl transition-all duration-300">
+    <div className="relative h-48 overflow-hidden">
+      <img
+        src="Rekon-Vagina.jpg"
+        alt="Kesehatan Intim"
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-700/30 to-transparent"></div>
+    </div>
+    <div className="p-6">
+      <h3 className="text-xl font-bold text-gray-900 mb-3">
+        Kesehatan Intim
+      </h3>
+      <p className="text-gray-600 leading-relaxed">
+        Vaginoplasti (Vaginoplasty) dan perawatan kesehatan intim untuk memulihkan fungsi, kenyamanan, dan kepercayaan diri perempuan.
+      </p>
+      <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm group-hover:gap-2 transition-all">
+        <span>Pelajari Lebih Lanjut</span>
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+      </div>
+    </div>
+  </div>
 
-            {/* Service Card 3 */}
-            <div className="group bg-white rounded-2xl border-2 border-blue-100 overflow-hidden hover:border-blue-400 hover:shadow-xl transition-all duration-300">
-              <div className="h-48 bg-gradient-to-br from-blue-200 to-slate-100 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent"></div>
-                <Baby className="w-20 h-20 text-blue-600 relative z-10 group-hover:scale-110 transition-transform" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Tumbuh Kembang Anak
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Pemantauan dan stimulasi perkembangan anak, edukasi orang tua untuk mendukung pertumbuhan optimal sejak dini.
-                </p>
-                <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm group-hover:gap-2 transition-all">
-                  <span>Pelajari Lebih Lanjut</span>
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  {/* Service Card 3 */}
+  <div className="group bg-white rounded-2xl border-2 border-blue-100 overflow-hidden hover:border-blue-400 hover:shadow-xl transition-all duration-300">
+    <div className="relative h-48 overflow-hidden">
+      <img
+        src="Tumbuh-Kembang.webp"
+        alt="Tumbuh Kembang Anak"
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-700/30 to-transparent"></div>
+    </div>
+    <div className="p-6">
+      <h3 className="text-xl font-bold text-gray-900 mb-3">
+        Tumbuh Kembang Anak
+      </h3>
+      <p className="text-gray-600 leading-relaxed">
+        Pemantauan dan stimulasi perkembangan anak, edukasi orang tua untuk mendukung pertumbuhan optimal sejak dini.
+      </p>
+      <div className="mt-4 flex items-center text-blue-600 font-semibold text-sm group-hover:gap-2 transition-all">
+        <span>Pelajari Lebih Lanjut</span>
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
       </section>
 
       {/* Tim Profesional */}
@@ -327,9 +335,11 @@ export default function AboutUs() {
               <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-100">
                 <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 via-slate-50 to-blue-200 flex items-center justify-center">
                   <div className="text-center p-8">
-                    <Users className="w-32 h-32 text-blue-600 mx-auto mb-4" />
-                    <p className="text-xl font-bold text-blue-700">Tim Profesional</p>
-                    <p className="text-gray-600 mt-2">Siap Melayani Anda</p>
+                    <img
+        src="Saverina.jpg"
+        alt="Dokter Severina Adella"
+        className="absolute inset-0  w-full h-full object-cover"
+      />
                   </div>
                 </div>
               </div>
@@ -404,10 +414,10 @@ export default function AboutUs() {
             Hubungi kami untuk konsultasi atau jadwalkan kunjungan Anda hari ini
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl">
-              Buat Janji Temu
+            <button onClick={()=>navigate('/booking')} className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl">
+              Konsultasi Sekarang
             </button>
-            <button className="px-8 py-4 bg-white border-2 border-blue-600 text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all">
+            <button onClick={()=>navigate('/contact')} className="px-8 py-4 bg-white border-2 border-blue-600 text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all">
               Hubungi Kami
             </button>
           </div>

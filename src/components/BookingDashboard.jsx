@@ -191,7 +191,7 @@ setPayment(response.data.session.session_data.data);
               )}
 
               {/* JOIN TELEMEDICINE */}
-              {b.Service?.is_live && (
+              {b.Service?.is_live && b.payment_status === 'paid' && b.status === 'Completed' && (
                 <button
                   onClick={() => handleJoin(b.id)}
                   className="

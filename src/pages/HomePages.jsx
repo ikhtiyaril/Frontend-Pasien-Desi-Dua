@@ -8,6 +8,7 @@ import PromoCarousel from '@/components/LandingSlider'
 import TestimonialCarousel from '@/components/LandingTestimoni'
 import { useLocation } from 'react-router-dom'
 import FloatingWhatsapp from '@/components/FloatingWhatsapp'
+import TikTokTestimoni from '@/components/TikTokTestimoni'
 
 const HomePages = () => {
   
@@ -18,7 +19,9 @@ const HomePages = () => {
     <ArticleHome/>
     <MedicineLanding/>
     <PromoCarousel/>
+    <TikTokTestimoni/>
     <TestimonialCarousel/>
+
     <FloatingWhatsapp/>
     
  <Footer/>

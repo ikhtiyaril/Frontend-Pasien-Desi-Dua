@@ -27,7 +27,9 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-4 gap-10">
         
         {/* Logo & Desc */}
-        <div className="space-y-3">
+        <div className="space">
+                     <img src="Desi Dua Biru.png" alt="" className="h-24 w-24"/>
+
           <h2 className="text-2xl font-semibold text-blue-700">
             Desidua Klinik
           </h2>
