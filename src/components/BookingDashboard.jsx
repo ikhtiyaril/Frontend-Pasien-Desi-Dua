@@ -50,20 +50,21 @@ export default function BookingDashboard() {
     }
   };
 
-  const handlePay = async(id)=>{
-    localStorage.getItem('token')
-    const response = await axios.get(
-  `${API}/api/payment/session`,
-  {
-    params: { type: "booking", id },
-    headers: { Authorization: `Bearer ${token}` }
-  }
-);
- console.log(response.data)
-setPayment(response.data.session.session_data.data);
+   const handlePay = async (id) => {
+    try {
+    const token = await localStorage.getItem("token");
 
-
-  }
+      const res = await axios.get(`${API}/api/payment/session`, {
+        params: { type: "booking", id },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("HANDLE PAY ONCLICK")
+console.log(res.data)
+      setPayment(res.data.session.session_data.data);
+    } catch (err) {
+      console.log("Payment error:", err);
+    }
+  };
   // FILTER: Offline / Live
   const filteredBookings =
     activeTab === "offline"

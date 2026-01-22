@@ -58,6 +58,7 @@ setPayment(response.data.session.session_data.data);
 
 
   }
+  
   const formatCurrency = (value) => {
     try {
       // safe convert decimal string -> number

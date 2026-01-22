@@ -26,6 +26,7 @@ import ServicesPages from './pages/ServicesPages'
 import ContactPages from './pages/ContactPages'
 import DoctorListPages from './pages/DoctorListPages'
 import VerifyEmail from './pages/VerifyOtpPages'
+import BookingDoctorOnlyPages from './pages/BookingDoctorOnlyPages'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -56,6 +57,8 @@ function App() {
         <Route path="/layanan" element={<ServicesPages/>}/>
         <Route path="/contact" element={<ContactPages/>}/>
         <Route path="/verify-account" element={<VerifyEmail/>}/>
+        <Route path="/doctor-booking" element={<BookingDoctorOnlyPages/>}/>
+
 
         
 

@@ -8,8 +8,10 @@ import {
   ClipboardList,
   ShoppingCart,
   LogOut,
+  BriefcaseMedical
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import MedicalRecord from "@/components/MedicalRecord";
 
 export default function DashboardPasienPages() {
   const location = useLocation();
@@ -21,6 +23,8 @@ export default function DashboardPasienPages() {
     { key: "booking", label: "Booking", icon: CalendarCheck },
     { key: "orders", label: "Orders", icon: ClipboardList },
     { key: "cart", label: "Cart", icon: ShoppingCart },
+    { key: "record", label: "Medical Record", icon: BriefcaseMedical },
+
   ];
 
   const [activeMenu, setActiveMenu] = useState("booking");
@@ -48,6 +52,8 @@ export default function DashboardPasienPages() {
         return <OrdersDashboard />;
       case "cart":
         return <Cart />;
+        case "record":
+        return <MedicalRecord />;
       default:
         return <div className="p-6">Menu tidak ditemukan.</div>;
     }

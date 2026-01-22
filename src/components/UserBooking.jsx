@@ -45,10 +45,21 @@ export default function UserBooking() {
   // =====================
   // FETCH SERVICES
   // =====================
-  const fetchServices = async () => {
+ const fetchServices = async () => {
+  try {
     const res = await axios.get(`${API}/api/service`);
-    setServices(res.data);
-  };
+
+    const filteredServices = res.data.filter(
+      service => service.is_doctor_service === false
+    );
+
+    console.log(filteredServices);
+    setServices(filteredServices);
+  } catch (error) {
+    console.error("Failed to fetch services:", error);
+  }
+};
+
 
 
   const fetchDoctors = async () => {

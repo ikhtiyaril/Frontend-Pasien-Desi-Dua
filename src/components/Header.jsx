@@ -258,7 +258,13 @@ const Header = () => {
               onClick={() => navigate("/booking")}
               className="px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium"
             >
-              Booking
+              Layanan Khusus
+            </button>
+            <button
+              onClick={() => navigate("/doctor-booking")}
+              className="px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium"
+            >
+              Konsultasi
             </button>
             <button
               onClick={() => navigate("/article")}
