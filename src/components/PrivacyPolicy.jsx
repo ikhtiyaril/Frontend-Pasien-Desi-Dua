@@ -159,11 +159,77 @@ export default function PrivacyPolicy() {
             </ul>
           </section>
 
+<section className="space-y-4">
+  <h2 className="text-2xl font-bold text-slate-900 flex items-center">
+    <span className="text-blue-600 mr-2">7.</span> Data Akun Google
+  </h2>
+
+  <p className="leading-relaxed">
+    Aplikasi Klinik Desidua memungkinkan pengguna untuk melakukan pendaftaran
+    dan masuk (login) menggunakan akun Google.
+  </p>
+
+  <p className="leading-relaxed">
+    Dalam proses tersebut, kami hanya mengakses data dasar dari akun Google
+    pengguna, yaitu:
+  </p>
+
+  <ul className="list-disc list-outside pl-5 space-y-2 marker:text-blue-600">
+    <li>Nama pengguna</li>
+    <li>Alamat email</li>
+    <li>Foto profil (jika tersedia)</li>
+  </ul>
+
+  <p className="leading-relaxed">
+    Data ini digunakan semata-mata untuk keperluan autentikasi, pembuatan akun,
+    dan keamanan akses pengguna ke layanan Klinik Desidua.
+  </p>
+
+  <p className="leading-relaxed">
+    Klinik Desidua tidak mengakses, membaca, menyimpan, atau memproses data lain
+    dari akun Google pengguna seperti email, kontak, atau konten pribadi.
+  </p>
+
+  <p className="leading-relaxed">
+    Data akun Google pengguna tidak dibagikan kepada pihak ketiga dan hanya
+    disimpan selama akun pengguna aktif. Pengguna dapat meminta penghapusan
+    data akun mereka kapan saja melalui kontak resmi Klinik Desidua.
+  </p>
+
+<p className="leading-relaxed">
+    Data Akun Google:
+Desidua memungkinkan pengguna melakukan pendaftaran dan masuk (login) menggunakan akun Google. Dalam proses tersebut, kami hanya mengakses data dasar dari akun Google pengguna, yaitu: nama pengguna, alamat email, dan foto profil (jika tersedia). Data ini hanya digunakan untuk autentikasi, pembuatan akun, dan keamanan akses. 
+
+Desidua TIDAK mengakses, membaca, menyimpan, atau memproses email pengguna melalui Gmail API, dan tidak memiliki kemampuan untuk membaca, mengirim, atau menghapus email dalam akun Google pengguna.
+
+  </p>
+
+  <p className="leading-relaxed">
+   Retensi dan Penghapusan Data:
+Data pengguna disimpan selama akun aktif dan/atau sampai pengguna meminta penghapusan. Untuk permintaan penghapusan data, silakan hubungi kami di desiduaapotek@gmail.com. Permintaan akan diproses dalam jangka waktu maksimal 30 hari sejak verifikasi identitas user, kecuali jika terdapat kewajiban hukum yang mengharuskan penyimpanan lebih lama.
+
+  </p>
+
+
+
+   <p className="leading-relaxed">
+
+
+
+
+
+
+    Pihak Ketiga:
+Kami dapat membagikan data yang diperlukan kepada penyedia layanan tepercaya untuk mendukung operasi layanan, termasuk (tetapi tidak terbatas pada): penyedia pembayaran (mis. Xendit), penyedia hosting dan infrastruktur (mis. Vercel atau provider VPS), serta penyedia layanan email (mis. SendGrid). Semua pihak ketiga tersebut terikat oleh perjanjian yang membatasi penggunaan data hanya untuk tujuan yang disetujui.
+
+  </p>
+</section>
+
           {/* Section 7 & 8 combined for better flow */}
           <section className="space-y-8">
              <div className="space-y-4">
               <h2 className="text-2xl font-bold text-slate-900 flex items-center">
-                <span className="text-blue-600 mr-2">7.</span> Cookies dan Teknologi Serupa
+                <span className="text-blue-600 mr-2">8.</span> Cookies dan Teknologi Serupa
               </h2>
               <p className="leading-relaxed">
                 Aplikasi atau website Kami dapat menggunakan cookies atau teknologi
