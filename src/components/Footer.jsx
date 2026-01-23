@@ -45,10 +45,21 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-4">Navigation</h3>
           <ul className="space-y-2 text-gray-600 text-sm">
-            <li onClick={()=>Navigate("/contact")} className="hover:text-blue-600 cursor-pointer">Kontak Kami</li>
-            <li onClick={()=>Navigate("/about-us")} className="hover:text-blue-600 cursor-pointer">Tentang Kami</li>
-            <li onClick={()=>Navigate("/terms-of-service")} className="hover:text-blue-600 cursor-pointer">Kebijakan Layanan</li>
-            <li onClick={()=>Navigate("/privacy-policy")} className="hover:text-blue-600 cursor-pointer">Kebijakan Privasi</li>
+            <li>
+  <a href="/contact" className="hover:text-blue-600">Kontak Kami</a>
+</li>
+<li>
+  <a href="/about-us" className="hover:text-blue-600">Tentang Kami</a>
+</li>
+<li>
+  <a href="/terms-of-service" className="hover:text-blue-600">Kebijakan Layanan</a>
+</li>
+<li>
+  <a href="/privacy-policy" className="hover:text-blue-600">
+    Kebijakan Privasi
+  </a>
+</li>
+
           </ul>
         </div>
 
