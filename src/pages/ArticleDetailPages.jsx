@@ -7,11 +7,11 @@ import FloatingWhatsapp from '@/components/FloatingWhatsapp'
 const ArticleDetailPages = () => {
   return (
    <>
-   <Header/>
+  
    <ArticleDetail/>
        <FloatingWhatsapp/>
    
-   <Footer/>
+
 
    </>
   )

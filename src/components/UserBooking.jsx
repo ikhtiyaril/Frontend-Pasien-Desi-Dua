@@ -582,7 +582,7 @@ const calculatorPrice = async () =>{
 
 {paymentTime && !paymentMethod && (
   <div className="p-6" >
-      <h1 className="text-2xl font-bold mb-6 text-white">Metode Pembayaran</h1>
+      <h1 className="text-2xl font-bold mb-6 text-blue-600">Metode Pembayaran</h1>
       <PaymentMethodList data={payment} />
     </div>
 )}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Menu, X, Package, FileText, Loader2, ChevronDown, User, ShoppingCart } from "lucide-react";
+import { Search, Menu, X, Package, FileText, Loader2, ChevronDown, User, ShoppingCart, Phone, Clock, Store, Calendar, BookOpen, Info } from "lucide-react";
 import axios from "axios";
 
 const API = import.meta.env.VITE_API_URL;
@@ -96,12 +96,15 @@ const Header = () => {
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center text-xs sm:text-sm text-white">
-            <div className="flex items-center gap-4">
-              <span className="hidden sm:inline">📞 Hubungi Kami: 0800-123-4567</span>
-              <span className="sm:hidden">📞 0811-8000-2350</span>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Hubungi Kami: 0800-123-4567</span>
+              <span className="sm:hidden">0811-8000-2350</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Jam Operasional: 24/7 CS</span>
+              <span className="sm:hidden">24/7 CS</span>
             </div>
           </div>
         </div>
@@ -115,9 +118,9 @@ const Header = () => {
             className="flex items-center gap-2 cursor-pointer group"
             onClick={() => navigate("/")}
           >
-           <img src="Desi Dua Emas.png" alt="" className="h-16 w-16"/>
+           <img src="Desi Dua Emas.png" alt="" className="h-12 w-12 sm:h-16 sm:w-16"/>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
                 Desidua
               </h1>
             </div>
@@ -310,8 +313,6 @@ const Header = () => {
 
           {/* DESKTOP ACTIONS */}
           <div className="hidden lg:flex items-center gap-2">
-           
-            
             {!userLog ? (
               <button
                 className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
@@ -363,8 +364,11 @@ const Header = () => {
                   value={searchQuery}
                   onChange={onSearchChange}
                   onFocus={() => searchQuery && setShowSearchResults(true)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-blue-200 bg-blue-50/30 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:bg-white"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-blue-200 bg-blue-50/30 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
                 />
+                {isSearching && (
+                  <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 w-5 h-5 animate-spin" />
+                )}
               </div>
 
               {/* Mobile Search Results */}
@@ -373,15 +377,20 @@ const Header = () => {
                   {searchResults.products.length === 0 && searchResults.articles.length === 0 && !isSearching && (
                     <div className="p-6 text-center text-gray-500">
                       <Search className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                      <p className="text-sm">Tidak ada hasil</p>
+                      <p className="text-sm font-medium">Tidak ada hasil</p>
+                      <p className="text-xs mt-1">Coba kata kunci lain</p>
                     </div>
                   )}
 
+                  {/* Mobile Products Section */}
                   {searchResults.products.length > 0 && (
                     <div className="border-b-2 border-blue-50">
-                      <div className="px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100/50 text-xs font-bold text-blue-900 flex items-center gap-2">
-                        <Package className="w-4 h-4" />
-                        Produk Obat
+                      <div className="px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100/50 flex items-center gap-2 border-b border-blue-100">
+                        <Package className="w-4 h-4 text-blue-600" />
+                        <h3 className="text-xs font-bold text-blue-900">Produk Obat</h3>
+                        <span className="ml-auto text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">
+                          {searchResults.products.length}
+                        </span>
                       </div>
                       {searchResults.products.slice(0, 3).map((product) => (
                         <div
@@ -390,22 +399,48 @@ const Header = () => {
                             goToProduct(product.id);
                             setMenuOpen(false);
                           }}
-                          className="px-3 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50"
+                          className="px-3 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-b-0 active:bg-blue-100 transition-all"
                         >
-                          <p className="font-semibold text-gray-900 text-sm">{product.name}</p>
-                          <p className="text-xs text-blue-600 font-bold mt-1">
-                            Rp {Number(product.price).toLocaleString()}
-                          </p>
+                          <div className="flex items-center gap-3">
+                            {product.image_url ? (
+                              <img
+                                src={product.image_url}
+                                alt={product.name}
+                                className="w-12 h-12 rounded-lg object-cover border-2 border-blue-100"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center border-2 border-blue-200">
+                                <Package className="w-6 h-6 text-blue-600" />
+                              </div>
+                            )}
+                            <div className="flex-1">
+                              <p className="font-semibold text-gray-900 text-sm line-clamp-1">{product.name}</p>
+                              {product.category?.name && (
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                  <span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium">
+                                    {product.category.name}
+                                  </span>
+                                </p>
+                              )}
+                              <p className="text-sm font-bold text-blue-600 mt-1">
+                                Rp {Number(product.price).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
                   )}
 
+                  {/* Mobile Articles Section */}
                   {searchResults.articles.length > 0 && (
                     <div>
-                      <div className="px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100/50 text-xs font-bold text-blue-900 flex items-center gap-2">
-                        <FileText className="w-4 h-4" />
-                        Artikel
+                      <div className="px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100/50 flex items-center gap-2 border-b border-blue-100">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                        <h3 className="text-xs font-bold text-blue-900">Artikel Kesehatan</h3>
+                        <span className="ml-auto text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">
+                          {searchResults.articles.length}
+                        </span>
                       </div>
                       {searchResults.articles.slice(0, 3).map((article) => (
                         <div
@@ -414,11 +449,23 @@ const Header = () => {
                             goToArticle(article.id);
                             setMenuOpen(false);
                           }}
-                          className="px-3 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50"
+                          className="px-3 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-b-0 active:bg-blue-100 transition-all"
                         >
-                          <p className="font-semibold text-gray-900 text-sm line-clamp-2">
-                            {article.title}
-                          </p>
+                          <div className="flex items-start gap-3">
+                            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center flex-shrink-0 border-2 border-blue-200">
+                              <FileText className="w-6 h-6 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-semibold text-gray-900 text-sm line-clamp-2">
+                                {article.title}
+                              </p>
+                              {article.author?.name && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  <span className="font-medium text-blue-600">{article.author.name}</span>
+                                </p>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -434,32 +481,48 @@ const Header = () => {
                   navigate("/medicine");
                   setMenuOpen(false);
                 }}
-                className="w-full text-left px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium"
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium active:bg-blue-100"
               >
-                🏪 Toko Obat
+                <Store className="w-5 h-5 text-blue-600" />
+                <span>Toko Obat</span>
               </button>
               <button
                 onClick={() => {
                   navigate("/booking");
                   setMenuOpen(false);
                 }}
-                className="w-full text-left px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium"
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium active:bg-blue-100"
               >
-                📅 Booking Online
+                <Calendar className="w-5 h-5 text-blue-600" />
+                <span>Layanan Khusus</span>
+              </button>
+              <button
+                onClick={() => {
+                  navigate("/doctor-booking");
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium active:bg-blue-100"
+              >
+                <User className="w-5 h-5 text-blue-600" />
+                <span>Konsultasi</span>
               </button>
               <button
                 onClick={() => {
                   navigate("/article");
                   setMenuOpen(false);
                 }}
-                className="w-full text-left px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium"
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-medium active:bg-blue-100"
               >
-                📰 Artikel
+                <BookOpen className="w-5 h-5 text-blue-600" />
+                <span>Artikel</span>
               </button>
 
               {/* Mobile Info Links */}
               <div className="pt-2 border-t-2 border-blue-100">
-                <p className="px-4 py-2 text-xs font-bold text-gray-500 uppercase">Informasi</p>
+                <div className="flex items-center gap-2 px-4 py-2">
+                  <Info className="w-4 h-4 text-gray-500" />
+                  <p className="text-xs font-bold text-gray-500 uppercase">Informasi</p>
+                </div>
                 {[
                   { label: "Tentang Kami", href: "/about-us" },
                   { label: "Dokter Kami", href: "/we-doctor" },
@@ -469,7 +532,8 @@ const Header = () => {
                   <a
                     key={item.href}
                     href={item.href}
-                    className="block px-4 py-2.5 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-4 py-2.5 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all active:bg-blue-100"
                   >
                     {item.label}
                   </a>
@@ -477,11 +541,11 @@ const Header = () => {
               </div>
             </div>
 
-            {/* Mobile Action Button */}
-            <div className="pt-3 border-t-2 border-blue-100">
+            {/* Mobile Action Buttons */}
+            <div className="pt-3 border-t-2 border-blue-100 space-y-2">
               {!userLog ? (
                 <button
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md active:shadow-lg flex items-center justify-center gap-2"
                   onClick={() => {
                     navigate("/login");
                     setMenuOpen(false);
@@ -491,16 +555,28 @@ const Header = () => {
                   Masuk / Daftar
                 </button>
               ) : (
-                <button
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md flex items-center justify-center gap-2"
-                  onClick={() => {
-                    navigate("/dashboard");
-                    setMenuOpen(false);
-                  }}
-                >
-                  <User className="w-5 h-5" />
-                  Dashboard
-                </button>
+                <>
+                  <button
+                    className="w-full py-3 bg-white border-2 border-blue-600 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-all flex items-center justify-center gap-2"
+                    onClick={() => {
+                      navigate("/dashboard", { state: { active: 'cart' } });
+                      setMenuOpen(false);
+                    }}
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    Keranjang
+                  </button>
+                  <button
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md active:shadow-lg flex items-center justify-center gap-2"
+                    onClick={() => {
+                      navigate("/dashboard");
+                      setMenuOpen(false);
+                    }}
+                  >
+                    <User className="w-5 h-5" />
+                    Dashboard
+                  </button>
+                </>
               )}
             </div>
           </div>

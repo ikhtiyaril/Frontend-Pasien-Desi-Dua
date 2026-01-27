@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import PaymentMethodList from "./PaymentMethodList";
 import PaymentMethodCheckbox from "./CheckboxPayment";
-import { Calculator } from "lucide-react";
+import { Calculator, ArrowLeft, Calendar as CalendarIcon, Clock as ClockIcon, FileText, ChevronDown } from "lucide-react";
 import PaymentFeeCalculator from "./CalculatorPayment";
 import FloatingPayment from "./FloatingPayment";
+import BookingService from "./BookingService";
+import BookingDoctorCard from "./BookingDoctorCard";
 
 export default function UserBookingMobile() {
   const API = import.meta.env.VITE_API_URL;
@@ -40,8 +42,15 @@ export default function UserBookingMobile() {
   // FETCH SERVICES
   // =====================
   const fetchServices = async () => {
-    const res = await axios.get(`${API}/api/service`);
-    setServices(res.data);
+    try {
+      const res = await axios.get(`${API}/api/service`);
+      const filteredServices = res.data.filter(
+        (service) => service.is_doctor_service === false
+      );
+      setServices(filteredServices);
+    } catch (error) {
+      console.error("Failed to fetch services:", error);
+    }
   };
 
   const fetchDoctors = async () => {
@@ -50,7 +59,6 @@ export default function UserBookingMobile() {
   };
 
   const fetchBlockedTimes = async () => {
-    if (!form.doctor_id || !form.date) return;
     const res = await axios.get(
       `${API}/api/blocked-time/doctor/${form.doctor_id}/date/${form.date}`
     );
@@ -59,7 +67,7 @@ export default function UserBookingMobile() {
 
   const fetchPayment = async () => {
     try {
-      const res = await axios.get(`${API}/api/payment`);
+      const res = await axios.get(` ${API}/api/payment`);
       setPayment(res.data.data.data);
     } catch (error) {
       console.error(error.response?.data || error.message);
@@ -70,9 +78,12 @@ export default function UserBookingMobile() {
     if (!form.doctor_id || !form.date) return;
 
     try {
-      const res = await axios.get(`${API}/api/doctor-schedule/${form.doctor_id}`, {
-        params: { date: form.date },
-      });
+      const res = await axios.get(
+        `${API}/api/doctor-schedule/${form.doctor_id}`,
+        {
+          params: { date: form.date },
+        }
+      );
       const data = Array.isArray(res.data) ? res.data[0] : res.data;
       setDoctorSchedule(data);
     } catch (err) {
@@ -81,16 +92,40 @@ export default function UserBookingMobile() {
   };
 
   useEffect(() => {
+    if (!form.doctor_id || !form.date) return;
+    fetchBlockedTimes();
+  }, [form.doctor_id, form.date]);
+
+  useEffect(() => {
     fetchServices();
     fetchDoctors();
     fetchPayment();
   }, []);
 
   useEffect(() => {
-    if (!form.doctor_id || !form.date) return;
-    fetchBlockedTimes();
-  }, [form.doctor_id, form.date]);
+    if (!form.service_id) return;
 
+    const selectedService = services.find(
+      (s) => s.id === Number(form.service_id)
+    );
+
+    if (selectedService) {
+      setDuration(selectedService.duration_minutes || 30);
+    }
+
+    const filtered = doctors.filter((d) =>
+      selectedService?.doctorIds?.includes(d.id)
+    );
+
+    setAvailableDoctors(filtered);
+
+    // reset dokter
+    setForm((prev) => ({ ...prev, doctor_id: "" }));
+  }, [form.service_id, services, doctors]);
+
+  // =====================
+  // HANDLE DOCTOR / DATE CHANGE
+  // =====================
   useEffect(() => {
     fetchSchedules();
   }, [form.doctor_id, form.date]);
@@ -98,6 +133,7 @@ export default function UserBookingMobile() {
   // =====================
   // TIME SLOT GENERATOR
   // =====================
+
   const minutesToTime = (m) => {
     const h = String(Math.floor(m / 60)).padStart(2, "0");
     const mm = String(m % 60).padStart(2, "0");
@@ -105,7 +141,7 @@ export default function UserBookingMobile() {
   };
 
   const timeToMinutes = (t) => {
-    if (!t) return 0; // handle undefined/null
+    if (!t) return 0;
     const [h, m] = t.split(":");
     return parseInt(h) * 60 + parseInt(m);
   };
@@ -125,15 +161,14 @@ export default function UserBookingMobile() {
     for (let t = start; t + duration <= end; t += duration) {
       const slot = { time: minutesToTime(t), disabled: false };
 
-      // disable break time
       if (breakStart && breakEnd && t >= breakStart && t < breakEnd) {
         slot.disabled = true;
       }
 
-      // disable blocked times
       blockedTime.forEach((b) => {
         const bStart = timeToMinutes(b.time_start);
         const bEnd = timeToMinutes(b.time_end);
+
         if (t >= bStart && t < bEnd) slot.disabled = true;
       });
 
@@ -145,7 +180,7 @@ export default function UserBookingMobile() {
 
   useEffect(() => {
     generateSlots();
-  }, [doctorSchedule, duration, blockedTime]);
+  }, [doctorSchedule, duration]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -175,32 +210,27 @@ export default function UserBookingMobile() {
         time_start: "",
         notes: "",
       });
-      console.log(res.data.booking);
-      console.log("info payment:", JSON.stringify(calculatorData?.[0]?.total_fee?.merchant));
 
-      // 🔥 Build payment payload LANGSUNG di sini
       const paymentPayload = {
         method: paymentMethod,
         merchant_ref: res.data.booking.booking_code,
-        amount: (selectedService?.price || 0) + (calculatorData?.[0]?.total_fee?.merchant || 0),
+        amount: selectedService.price + calculatorData[0].total_fee.merchant,
         order_items: [
           {
-            name: selectedService?.name || "Service",
-            price: (selectedService?.price || 0) + (calculatorData?.[0]?.total_fee?.merchant || 0),
+            name: selectedService.name,
+            price:
+              selectedService.price + calculatorData[0].total_fee.merchant,
             quantity: 1,
           },
         ],
         id: res.data.booking.id,
       };
 
-      // 🔥 Kirim payload-nya, bukan state paymentData
       const response = await axios.post(`${API}/api/payment`, paymentPayload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log(response.data);
       setPaymentTransaction(response.data.data);
-
       setAvailableDoctors([]);
       setSlots([]);
     } catch (err) {
@@ -228,31 +258,12 @@ export default function UserBookingMobile() {
   };
 
   useEffect(() => {
-    if (!form.service_id) return;
-
-    const selectedService = services.find((s) => s.id === Number(form.service_id));
-
-    if (selectedService) {
-      // Simpan durasi service
-      setDuration(selectedService.duration_minutes || 30);
-    }
-
-    const filtered = doctors.filter((d) => selectedService?.doctorIds?.includes(d.id));
-
-    setAvailableDoctors(filtered);
-
-    // reset dokter
-    setForm((prev) => ({ ...prev, doctor_id: "" }));
-  }, [form.service_id, services, doctors]);
-
-  useEffect(() => {
     if (paymentMethod) {
       calculatorPrice();
     }
   }, [paymentMethod]);
 
   const calculatorPrice = async () => {
-    if (!selectedService) return;
     const res = await axios.post(`${API}/api/payment/fee`, {
       code: paymentMethod,
       amount: selectedService.price,
@@ -261,287 +272,245 @@ export default function UserBookingMobile() {
     setCalculatorData(res.data.data);
   };
 
+  // ========================================================
+  // MOBILE UI RENDER
+  // ========================================================
+  
+  // Helper to go back
+  const handleBack = () => {
+    if (selectedDoctor) {
+      setSelectedDoctor(null);
+      setForm(prev => ({ ...prev, doctor_id: "" }));
+      return;
+    }
+    if (selectedService) {
+      setSelectedService(null);
+      setForm(prev => ({ ...prev, service_id: "" }));
+      return;
+    }
+  };
+
+  // Helper for Time Selection (Chip Style)
+  const handleTimeSelect = (time) => {
+    setForm(prev => ({ ...prev, time_start: time }));
+    setPaymentTime(true);
+  };
+
   return (
-    <div className="min-h-screen bg-blue-50 p-6 flex flex-col md:flex-row gap-6">
-           <div className="w-full md:w-1/2 space-y-6 md:sticky md:top-4 order-2 md:order-2 ">
-        {/* STEP 1: SERVICE LIST */}
+    <div className="min-h-screen bg-gray-50 pb-32 font-sans">
+      {/* HEADER MOBILE */}
+      <div className="bg-white px-4 py-4 sticky top-0 z-20 shadow-sm flex items-center gap-3">
+        {(selectedService || selectedDoctor) && (
+          <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100">
+            <ArrowLeft className="w-6 h-6 text-gray-700" />
+          </button>
+        )}
+        <h1 className="text-lg font-bold text-gray-800">
+          {!selectedService 
+            ? "Pilih Layanan" 
+            : !selectedDoctor 
+              ? "Pilih Dokter" 
+              : "Detail Booking"}
+        </h1>
+      </div>
+
+      <div className="p-4 space-y-4">
+        
+        {/* VIEW 1: PILIH LAYANAN */}
         {!selectedService && (
-          <div>
-            <div className="grid grid-cols-1 gap-5">
-              {services.map((s) => (
-                <div
-                  key={s.id}
-                  className="
-            group bg-white p-4 rounded-2xl shadow-md border border-blue-100 
-            flex gap-5 cursor-pointer transition-all
-            hover:shadow-xl hover:-translate-y-1 hover:border-blue-300 
-            hover:bg-white/90
-          "
-                  onClick={() => chooseService(s)}
-                >
-                  {/* Gambar */}
-                  <div className="shrink-0">
-                    <img
-                      className="w-20 h-20 rounded-xl object-cover shadow-sm group-hover:shadow-md transition"
-                      src="/Poli-Umum.jpg"
-                      alt={s.name}
-                    />
-                  </div>
-
-                  {/* Konten */}
-                  <div className="flex flex-col justify-between grow">
-                    <div>
-                      <h3 className="font-bold text-blue-700 text-lg leading-snug">{s.name}</h3>
-
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">{s.description}</p>
-                    </div>
-
-                    {/* Durasi */}
-                    <div className="flex items-center gap-2 mt-2">
-                      <img className="w-5 h-5" src="/duration.png" alt="durasi" />
-                      <p className="text-sm text-gray-500">{s.duration_minutes} menit</p>
-                    </div>
-
-                    {/* Harga */}
-                    <div className="flex items-center gap-2">
-                      <img className="w-5 h-5" src="/Price.png" alt="harga" />
-                      <p className="font-semibold text-red-500 text-sm">{s.price ? `Rp ${s.price}` : "Free"}</p>
-                    </div>
-
-                    {/* Jenis Layanan */}
-                    <p className="text-sm font-medium mt-1 text-purple-600">{s.is_live ? "Video Call" : "Layanan Normal"}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="grid grid-cols-1 gap-4">
+             <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl mb-2">
+                <h2 className="text-blue-800 font-semibold mb-1">Halo!</h2>
+                <p className="text-sm text-blue-600">Pilih layanan kesehatan yang Anda butuhkan hari ini.</p>
+             </div>
+            {services.map((s) => (
+              <BookingService
+                key={s.id}
+                service={s}
+                onSelect={chooseService}
+              />
+            ))}
           </div>
         )}
 
-        {/* STEP 2: DOCTOR LIST */}
+        {/* VIEW 2: PILIH DOKTER */}
         {selectedService && !selectedDoctor && (
-          <div>
-            <div className="grid grid-cols-1 md:grid-cols gap-4">
+          <div className="space-y-4">
+            {/* Selected Service Summary */}
+            <div className="bg-white p-3 rounded-xl border border-blue-200 flex justify-between items-center shadow-sm">
+               <div>
+                  <p className="text-xs text-gray-500">Layanan Dipilih</p>
+                  <p className="font-bold text-blue-700">{selectedService.name}</p>
+               </div>
+               <button onClick={() => setSelectedService(null)} className="text-xs text-blue-500 underline">Ganti</button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
               {doctors
                 .filter((d) => selectedService?.doctorIds?.includes(d.id))
                 .map((doc) => (
-                  <div
+                  <BookingDoctorCard
                     key={doc.id}
-                    onClick={() => chooseDoctor(doc)}
-                    className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition cursor-pointer w-full"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <img src={doc.avatar || "https://via.placeholder.com/100"} alt={doc.name} className="w-20 h-20 rounded-full object-cover" />
-
-                      <div>
-                        <h3 className="text-lg font-semibold text-blue-700">{doc.name}</h3>
-
-                        <p className="text-sm text-gray-600">{doc.specialization}</p>
-
-                        {/* Optional rating (kalau mau diisi nanti) */}
-                        <div className="flex items-center space-x-1 text-yellow-500 text-sm mt-1">
-                          <span>★★★★★</span>
-                          <span className="text-gray-400">(2)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Optional price & next schedule */}
-                    <div className="flex justify-between items-center mt-4">
-                      <p className="text-lg text-orange-500">{selectedService.price ? `Rp${selectedService.price}` : "Rp -"}</p>
-                      <p className="text-xs text-green-600">Jadwal Berikutnya: {doc.isActive ? "Tersedia" : "Tidak tersedia"}</p>
-                    </div>
-
-                    <button className="w-full mt-4 py-2 px-4 bg-orange-500 text-white rounded-lg hover:bg-orange-400 transition duration-200">Pilih Dokter</button>
-                  </div>
+                    doctor={doc}
+                    service={selectedService}
+                    onSelect={chooseDoctor}
+                  />
                 ))}
+                
+               {availableDoctors.length === 0 && (
+                 <div className="text-center py-10 text-gray-400">
+                   Tidak ada dokter tersedia untuk layanan ini.
+                 </div>
+               )}
             </div>
           </div>
         )}
 
-        {/* STEP 3: DATE & TIME INFO */}
-        {selectedDoctor && !paymentTime && (
-          <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-100">
-            <div className="flex items-start space-x-4">
-              {/* Avatar */}
-              <img src={selectedDoctor.avatar || "https://via.placeholder.com/120"} alt={selectedDoctor.name} className="w-24 h-24 rounded-full object-cover shadow" />
-
-              {/* Basic info */}
+        {/* VIEW 3: FORM BOOKING LENGKAP */}
+        {selectedDoctor && (
+          <div className="space-y-6 animate-fade-in">
+            
+            {/* 3.1 Doctor Info Card */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
+              <img
+                src={selectedDoctor.avatar || "https://via.placeholder.com/100"}
+                alt={selectedDoctor.name}
+                className="w-20 h-20 rounded-full object-cover bg-gray-100"
+              />
               <div className="flex-1">
-                <h2 className="text-2xl font-semibold text-blue-700">{selectedDoctor.name}</h2>
-                <p className="text-gray-600 text-sm">{selectedDoctor.specialization}</p>
-
-                {/* Optional Study / Education */}
-                {selectedDoctor.Study && <p className="text-gray-500 text-sm mt-1 italic">{selectedDoctor.Study}</p>}
-
-                {/* Rating */}
-                <div className="flex items-center space-x-1 mt-2">
-                  <span className="text-yellow-500 text-lg">★★★★★</span>
-                  <span className="text-sm text-gray-400">(12)</span>
-                </div>
+                <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">
+                  {selectedDoctor.name}
+                </h3>
+                <p className="text-sm text-blue-600 font-medium mb-1">{selectedDoctor.specialization}</p>
+                <p className="text-xs text-gray-500 line-clamp-2">{selectedDoctor.bio || "Dokter spesialis berpengalaman."}</p>
               </div>
             </div>
 
-            {/* Bio */}
-            <div className="mt-4">
-              <h3 className="font-semibold text-gray-700 mb-1">Tentang Dokter</h3>
-              <p className="text-gray-600 leading-relaxed text-sm">{selectedDoctor.bio || "Dokter ini belum menambahkan informasi bio."}</p>
+            {/* 3.2 Date Picker */}
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+              <label className="flex items-center gap-2 text-sm font-bold text-gray-800 mb-3">
+                <CalendarIcon className="w-4 h-4 text-blue-600" />
+                Pilih Tanggal
+              </label>
+              <input
+                type="date"
+                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 outline-none focus:ring-2 focus:ring-blue-500"
+                value={form.date}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, date: e.target.value }))
+                }
+              />
             </div>
 
-            {/* Extra info (optional fields) */}
-            <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-              <div>
-                <p className="text-gray-500">Nomor Telepon</p>
-                <p className="font-medium text-gray-700">{selectedDoctor.phone}</p>
+            {/* 3.3 Time Slots (Chips Style) */}
+            <div className={`bg-white p-4 rounded-xl shadow-sm border border-gray-100 transition-all ${!form.date ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+              <label className="flex items-center gap-2 text-sm font-bold text-gray-800 mb-3">
+                <ClockIcon className="w-4 h-4 text-blue-600" />
+                Pilih Jam
+              </label>
+              
+              {slots.length > 0 ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {slots.map((s) => (
+                    <button
+                      key={s.time}
+                      disabled={s.disabled}
+                      onClick={() => handleTimeSelect(s.time)}
+                      className={`
+                        py-2 px-1 text-sm rounded-lg border font-medium transition-colors
+                        ${s.disabled 
+                          ? "bg-gray-100 text-gray-400 border-transparent cursor-not-allowed" 
+                          : form.time_start === s.time
+                            ? "bg-blue-600 text-white border-blue-600 shadow-md transform scale-105"
+                            : "bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
+                        }
+                      `}
+                    >
+                      {s.time}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 bg-gray-50 rounded-lg border border-dashed text-gray-400 text-sm">
+                   {form.date ? "Tidak ada jadwal tersedia" : "Pilih tanggal terlebih dahulu"}
+                </div>
+              )}
+            </div>
+
+            {/* 3.4 Notes */}
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+              <label className="flex items-center gap-2 text-sm font-bold text-gray-800 mb-3">
+                <FileText className="w-4 h-4 text-blue-600" />
+                Keluhan / Catatan
+              </label>
+              <textarea
+                className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none h-24"
+                placeholder="Tulis keluhan singkat..."
+                value={form.notes}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, notes: e.target.value }))
+                }
+              />
+            </div>
+
+            {/* 3.5 Payment Method */}
+            {paymentTime && (
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                 <h3 className="text-sm font-bold text-gray-800 mb-4">Metode Pembayaran</h3>
+                 <PaymentMethodCheckbox
+                    data={payment}
+                    selectedMethod={paymentMethod}
+                    onChange={(val) => {setPaymentMethod(val)}}
+                  />
+                  
+                  {/* Calculator Summary */}
+                  {paymentMethod && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <PaymentFeeCalculator data={calculatorData} service={selectedService}/>
+                    </div>
+                  )}
               </div>
-
-              {selectedDoctor.price && (
-                <div>
-                  <p className="text-gray-500">Harga Konsultasi</p>
-                  <p className="font-medium text-orange-600">Rp{selectedDoctor.price.toLocaleString()}</p>
-                </div>
-              )}
-
-              {selectedDoctor.experience && (
-                <div>
-                  <p className="text-gray-500">Pengalaman</p>
-                  <p className="font-medium text-gray-700">{selectedDoctor.experience} tahun</p>
-                </div>
-              )}
-
-              {selectedDoctor.location && (
-                <div>
-                  <p className="text-gray-500">Lokasi Praktik</p>
-                  <p className="font-medium text-gray-700">{selectedDoctor.location}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Booking hint */}
-            <div className="mt-6 p-3 bg-blue-50 border border-blue-100 rounded-lg">
-              <p className="text-blue-700 text-sm">Silakan pilih tanggal & jam pada panel kanan untuk melanjutkan proses booking.</p>
-            </div>
+            )}
+            
           </div>
         )}
+      </div>
 
-        {paymentTime && !paymentMethod && (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold mb-6 text-white">Metode Pembayaran</h1>
-            <PaymentMethodList data={payment} />
+      {/* FLOATING BOTTOM BAR (Total & Submit) */}
+      {selectedDoctor && (
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30">
+          <div className="flex items-center justify-between gap-4 max-w-md mx-auto">
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-500">Total Biaya</span>
+              <span className="font-bold text-lg text-blue-700">
+                 {/* Simple formatted price display logic for sticky footer */}
+                 {paymentMethod && calculatorData 
+                    ? `Rp ${(selectedService.price + calculatorData[0].total_fee.merchant).toLocaleString()}`
+                    : `Rp ${selectedService?.price?.toLocaleString() || 0}`}
+              </span>
+            </div>
+            
+            <button 
+              onClick={handleSubmit} 
+              disabled={!form.time_start || !paymentMethod}
+              className={`
+                px-6 py-3 rounded-xl font-semibold text-white shadow-lg flex-1
+                ${(!form.time_start || !paymentMethod) 
+                   ? "bg-gray-400 cursor-not-allowed" 
+                   : "bg-blue-600 hover:bg-blue-700 active:scale-95 transition-transform"
+                }
+              `}
+            >
+              Booking Sekarang
+            </button>
           </div>
-        )}
-
-        {paymentMethod && <PaymentFeeCalculator data={calculatorData} service={selectedService} />}
-      </div>
-      {/* ===== RIGHT PANEL ===== */}
-      <div className="w-full md:w-1/3 bg-white p-6 rounded-xl shadow-md order-1 md:order-1">
-        <h2 className="text-xl font-bold mb-4 text-blue-700">Form Booking</h2>
-
-        {/* SERVICE */}
-        <div className="mb-4">
-          <label className="font-medium text-blue-800">Layanan</label>
-          <select
-            className="w-full mt-1 p-2 border rounded-lg"
-            value={form.service_id}
-            onChange={(e) => {
-              const s = services.find((x) => x.id == e.target.value);
-              chooseService(s);
-            }}
-          >
-            <option value="1">-- Pilih Layanan --</option>
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name} {s.is_live ? "(Online)" : "(Offline)"}
-              </option>
-            ))}
-          </select>
         </div>
+      )}
 
-        {/* DOCTOR */}
-        <div className="mb-4">
-          <label className="font-medium text-blue-800">Dokter</label>
-          <select
-            className="w-full mt-1 p-2 border rounded-lg"
-            value={form.doctor_id}
-            disabled={!selectedService}
-            onChange={(e) => {
-              const d = doctors.find((x) => x.id == e.target.value);
-              chooseDoctor(d);
-            }}
-          >
-            <option value="">-- Pilih Dokter --</option>
-            {selectedService &&
-              doctors
-                .filter((d) => selectedService?.doctorIds?.includes(d.id))
-                .map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-          </select>
-        </div>
-
-        {/* DATE */}
-        <div className="mb-4">
-          <label className="font-medium text-blue-800">Tanggal</label>
-          <input
-            type="date"
-            className="w-full mt-1 p-2 border rounded-lg"
-            disabled={!selectedDoctor}
-            value={form.date}
-            onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))}
-          />
-        </div>
-
-        {/* TIME */}
-        <select
-          name="time_start"
-          value={form.time_start}
-          onChange={(e) => {
-            handleChange(e);
-            setPaymentTime(true);
-          }}
-          className="w-full px-3 py-2 border border-blue-200 rounded-lg"
-          required
-          disabled={slots.length === 0}
-        >
-          <option value="">-- Pilih Jam --</option>
-          {slots.map((s) => (
-            <option key={s.time} value={s.time} disabled={s.disabled}>
-              {s.time} {s.disabled ? " (Unavailable)" : ""}
-            </option>
-          ))}
-        </select>
-
-        {/* NOTES */}
-        <div className="mb-4 mt-4">
-          <label className="font-medium text-blue-800">Catatan</label>
-          <textarea
-            className="w-full mt-1 p-2 border rounded-lg"
-            value={form.notes}
-            onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
-          />
-        </div>
-
-        <PaymentMethodCheckbox
-          data={payment}
-          selectedMethod={paymentMethod}
-          onChange={(val) => {
-            setPaymentMethod(val);
-          }}
-        />
-
-        <button
-          onClick={handleSubmit}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold mt-4"
-        >
-          Buat Booking
-        </button>
-      </div>
-
-      {/* ===== LEFT PANEL ===== */}
-   
-
-      <FloatingPayment payment={paymentTransaction} onClose={() => setPaymentTransaction(null)} />
+      <FloatingPayment
+        payment={paymentTransaction}
+        onClose={() => setPaymentTransaction(null)}
+      />
     </div>
   );
 }

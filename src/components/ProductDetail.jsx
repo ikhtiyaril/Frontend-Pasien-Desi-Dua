@@ -265,6 +265,10 @@ export default function ProductDetail() {
               </button>
               <button
                 disabled={product.stock === 0}
+               onClick={()=> {
+                navigate("/cart") 
+                addToCart(product.id, quantity)
+              }}
                 className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 Buy Now

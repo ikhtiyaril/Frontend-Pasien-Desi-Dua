@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import Footer from "./Footer";
+import Header from "./Header";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -32,124 +34,151 @@ export default function ArticleDetail() {
     fetchArticle();
   }, [slug]);
 
-  if (loading) return <p className="p-6 text-gray-500">Loading...</p>;
-  if (error) return <p className="p-6 text-red-500">{error}</p>;
+ 
 
   const blocks = article?.content?.blocks ?? [];
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      {/* TITLE */}
-      <h1 className="text-4xl font-bold mb-2">{article.title}</h1>
+    <>
+    <Header/>
+       {loading && (
+        <p className="p-6 text-gray-500 text-center text-lg animate-pulse">
+          Memuat artikel...
+        </p>
+      )}
 
-      {/* META */}
-      <div className="text-gray-500 mb-4 text-sm">
-        By {article.author?.name ?? "Unknown"} | Category:{" "}
-        {article.category?.name ?? "Uncategorized"} | Published:{" "}
-        {article.published_at
-          ? new Date(article.published_at).toLocaleDateString()
-          : "Draft"}
-      </div>
+      {error && (
+        <p className="p-6 text-red-500 text-center font-semibold">
+          {error}
+        </p>
+      )}
+        {!loading && !error && article && (
+    <div className="p-6 max-w-4xl mx-auto bg-white shadow-lg rounded-2xl my-10 border border-gray-100">
+      {/* HEADER: Judul & Meta */}
+      <header className="mb-8">
+        <h1 className="text-4xl font-extrabold mb-4 text-gray-900 leading-tight">
+          {article.title}
+        </h1>
+        <div className="flex items-center gap-3 text-sm text-gray-500 border-b pb-6">
+          <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium">
+            {article.category?.name ?? "Kesehatan"}
+          </span>
+          <span>•</span>
+          <span>Oleh <strong>{article.author?.name ?? "Tim Medis"}</strong></span>
+          <span>•</span>
+          <span>{article.published_at ? new Date(article.published_at).toLocaleDateString('id-ID', { dateStyle: 'long' }) : "Draft"}</span>
+        </div>
+      </header>
 
       {/* THUMBNAIL */}
-      <img
-        src={article.thumbnail ?? "/placeholder.jpg"}
-        alt={article.title}
-        className="w-full rounded mb-6"
-      />
+      {article.thumbnail && (
+        <div className="mb-10 overflow-hidden rounded-2xl shadow-sm">
+          <img
+            src={article.thumbnail}
+            alt={article.title}
+            className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+      )}
 
-      {/* CONTENT */}
-      <div className="prose prose-neutral max-w-full leading-relaxed">
-        {blocks.length === 0 && (
-          <p className="text-gray-400">Artikel ini belum memiliki konten.</p>
-        )}
-
-        {blocks.map((block, index) => {
-          switch (block.type) {
-            case "paragraph":
-              return (
-                <p key={index} dangerouslySetInnerHTML={{ __html: block.data.text }} />
-              );
-
-            case "header":
-              const Tag = `h${block.data.level}`;
-              return (
-                <Tag key={index} className="font-semibold mt-6">
-                  {block.data.text}
-                </Tag>
-              );
-
-            case "list":
-              if (block.data.style === "ordered") {
+      {/* CONTENT RENDERER */}
+      <article className="prose prose-lg prose-slate max-w-full leading-relaxed text-gray-800">
+        {blocks.length === 0 ? (
+          <p className="text-gray-400 italic">Konten tidak tersedia.</p>
+        ) : (
+          blocks.map((block) => {
+            switch (block.type) {
+              case "paragraph":
                 return (
-                  <ol key={index} className="list-decimal ml-6">
-                    {block.data.items.map((item, i) => (
-                      <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
-                    ))}
-                  </ol>
-                );
-              }
-              return (
-                <ul key={index} className="list-disc ml-6">
-                  {block.data.items.map((item, i) => (
-                    <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
-                  ))}
-                </ul>
-              );
-
-            case "image":
-              return (
-                <div key={index} className="my-4 text-center">
-                  <img
-                    src={block.data?.file?.url}
-                    alt={block.data.caption || "Image"}
-                    className="rounded"
+                  <p 
+                    key={block.id} 
+                    className="mb-5 text-gray-700 leading-8"
+                    dangerouslySetInnerHTML={{ __html: block.data.text }} 
                   />
-                  {block.data.caption && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      {block.data.caption}
-                    </p>
-                  )}
-                </div>
-              );
+                );
 
-            case "quote":
-              return (
-                <blockquote
-                  key={index}
-                  className="border-l-4 pl-4 italic text-gray-700 my-4"
-                >
-                  {block.data.text}
-                  {block.data.caption && (
-                    <cite className="block mt-1 text-sm text-gray-500">
-                      — {block.data.caption}
-                    </cite>
-                  )}
-                </blockquote>
-              );
+              case "header":
+                const Tag = `h${block.data.level}`;
+                const headerStyle = 
+                  block.data.level === 2 ? "text-3xl font-bold mt-10 mb-5 text-gray-900 border-l-4 border-blue-500 pl-4" : 
+                  "text-2xl font-semibold mt-8 mb-4 text-gray-800";
+                
+                return (
+                  <Tag 
+                    key={block.id} 
+                    className={headerStyle}
+                    dangerouslySetInnerHTML={{ __html: block.data.text }} 
+                  />
+                );
 
-            case "delimiter":
-              return (
-                <div key={index} className="my-6 text-center">
-                  <div className="text-2xl">•••</div>
-                </div>
-              );
+              case "list":
+                const ListTag = block.data.style === "ordered" ? "ol" : "ul";
+                const listClass = block.data.style === "ordered" ? "list-decimal" : "list-disc";
+                
+                return (
+                  <ListTag key={block.id} className={`${listClass} ml-8 mb-8 space-y-3`}>
+                    {block.data.items.map((item, i) => {
+                      // PENANGANAN KHUSUS LIST:
+                      // Jika item adalah string, gunakan langsung.
+                      // Jika item adalah object (dari Editor.js nested list), ambil properti 'content'.
+                      const itemContent = typeof item === "string" ? item : item.content;
+                      
+                      return (
+                        <li 
+                          key={i} 
+                          className="pl-2 text-gray-700"
+                          dangerouslySetInnerHTML={{ __html: itemContent }} 
+                        />
+                      );
+                    })}
+                  </ListTag>
+                );
 
-            case "code":
-              return (
-                <pre
-                  key={index}
-                  className="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm overflow-x-auto"
-                >
-                  <code>{block.data.code}</code>
-                </pre>
-              );
+              case "image":
+                return (
+                  <figure key={block.id} className="my-10 bg-gray-50 p-2 rounded-xl border">
+                    <img
+                      src={block.data?.file?.url}
+                      alt={block.data.caption || "Ilustrasi Medis"}
+                      className="rounded-lg mx-auto shadow-sm"
+                    />
+                    {block.data.caption && (
+                      <figcaption className="text-center text-sm text-gray-500 mt-4 italic">
+                        {block.data.caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                );
 
-            default:
-              return <div key={index} />;
-          }
-        })}
-      </div>
-    </div>
+              case "quote":
+                return (
+                  <blockquote
+                    key={block.id}
+                    className="border-l-4 border-blue-400 pl-6 italic text-gray-600 my-10 bg-blue-50/50 py-4 rounded-r-xl"
+                  >
+                    <p className="text-xl" dangerouslySetInnerHTML={{ __html: block.data.text }} />
+                    {block.data.caption && (
+                      <cite className="block text-sm font-bold text-gray-400 mt-2 not-italic">
+                        — {block.data.caption}
+                      </cite>
+                    )}
+                  </blockquote>
+                );
+
+              case "delimiter":
+                return (
+                  <hr key={block.id} className="my-12 border-t-2 border-gray-100 border-dashed" />
+                );
+
+              default:
+                return null;
+            }
+          })
+        )}
+      </article>
+     
+    </div>)}
+     <Footer/>
+    </>
   );
 }

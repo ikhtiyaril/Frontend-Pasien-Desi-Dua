@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -8,9 +9,12 @@ export default function PromoCarousel() {
   const [index, setIndex] = useState(0);
   const [expandedId, setExpandedId] = useState(null);
 
+  const navigate = useNavigate();
 
+  /* ================= UTILS ================= */
   const shuffleArray = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
+  /* ================= FETCH ================= */
   const fetchProducts = async () => {
     try {
       const res = await axios.get(`${API_BASE}/api/medicine/products`);
@@ -25,6 +29,7 @@ export default function PromoCarousel() {
     fetchProducts();
   }, []);
 
+  /* ================= AUTOPLAY ================= */
   useEffect(() => {
     if (!products.length) return;
     const interval = setInterval(() => {
@@ -37,60 +42,72 @@ export default function PromoCarousel() {
 
   return (
     <div className="w-full bg-gradient-to-r from-blue-50 to-white py-5">
-      
       <div className="relative w-full overflow-hidden">
+        {/* SLIDER */}
         <div
           className="flex transition-transform duration-700 ease-in-out"
           style={{ transform: `translateX(-${index * 100}%)` }}
         >
           {products.map((item) => (
-            <div
-              key={item.id}
-              className="min-w-full "
-            >
+            <div key={item.id} className="min-w-full">
               <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
                 
-                {/* GRID 1 – FOTO */}
-                <div className="flex justify-center">
+                {/* ================= GRID 1 – IMAGE ================= */}
+                <div
+                  className="flex justify-center cursor-pointer"
+                  onClick={() =>
+                    navigate("/medicine/detail", {
+                      state: { products_id: item.id },
+                    })
+                  }
+                >
                   <img
                     src={item.image_url || "/no-image.png"}
                     alt={item.name}
-                    className="w-60 h-60 object-cover rounded-xl bg-blue-50"
+                    className="w-60 h-60 object-cover rounded-xl bg-blue-50 hover:scale-105 transition"
                   />
                 </div>
 
-                {/* GRID 2 – NAMA & DESKRIPSI */}
-              <div>
-  <h3 className="text-2xl font-semibold text-gray-800 mb-3">
-    {item.name}
-  </h3>
+                {/* ================= GRID 2 – INFO ================= */}
+                <div>
+                  <h3
+                    className="text-2xl font-semibold text-gray-800 mb-3 cursor-pointer hover:text-blue-600"
+                    onClick={() =>
+                      navigate("/medicine/detail", {
+                        state: { products_id: item.id },
+                      })
+                    }
+                  >
+                    {item.name}
+                  </h3>
 
-  <p className="text-gray-600 leading-relaxed">
-    {expandedId === item.id
-      ? item.description
-      : item.description?.slice(0, 150)}
+                  <p className="text-gray-600 leading-relaxed">
+                    {expandedId === item.id
+                      ? item.description
+                      : item.description?.slice(0, 150)}
 
-    {item.description?.length > 150 && (
-      <span
-        onClick={() =>
-          setExpandedId(expandedId === item.id ? null : item.id)
-        }
-        className="text-blue-600 font-medium cursor-pointer ml-1 hover:underline"
-      >
-        {expandedId === item.id ? " Show less" : " Read more"}
-      </span>
-    )}
-  </p>
-</div>
+                    {item.description?.length > 150 && (
+                      <span
+                        onClick={() =>
+                          setExpandedId(
+                            expandedId === item.id ? null : item.id
+                          )
+                        }
+                        className="text-blue-600 font-medium cursor-pointer ml-1 hover:underline"
+                      >
+                        {expandedId === item.id
+                          ? " Show less"
+                          : " Read more"}
+                      </span>
+                    )}
+                  </p>
+                </div>
 
-
-                {/* GRID 3 – DETAIL & KERANJANG */}
+                {/* ================= GRID 3 – ACTION ================= */}
                 <div className="flex flex-col items-center md:items-end gap-4">
-                  
-                  {/* Logo Placeholder */}
                   <img
                     src="/info.png"
-                    alt="Logo"
+                    alt="Info"
                     className="w-8 h-8 object-contain opacity-60"
                   />
 
@@ -104,7 +121,15 @@ export default function PromoCarousel() {
                     </p>
                   )}
 
-                  <button className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition">
+                  {/* ✅ BUTTON → PRODUCT DETAIL */}
+                  <button
+                    onClick={() =>
+                      navigate("/medicine/detail", {
+                        state: { products_id: item.id },
+                      })
+                    }
+                    className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition shadow-md hover:shadow-lg"
+                  >
                     <img
                       src="/cart.png"
                       alt="Keranjang"
@@ -119,7 +144,7 @@ export default function PromoCarousel() {
           ))}
         </div>
 
-        {/* DOT NAVIGATION */}
+        {/* ================= DOT NAVIGATION ================= */}
         <div className="flex justify-center mt-6 gap-2">
           {products.map((_, i) => (
             <span

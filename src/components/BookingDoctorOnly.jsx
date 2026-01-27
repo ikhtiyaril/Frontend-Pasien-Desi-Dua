@@ -365,6 +365,8 @@ export default function BookingDoctorWeb() {
     );
   };
 
+const isServiceInactive = selectedService && selectedService.active === false;
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       {/* Header Halaman */}
@@ -493,6 +495,12 @@ export default function BookingDoctorWeb() {
                              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Layanan</h3>
                              {selectedService ? (
                                 <div className="p-3 border border-slate-200 rounded-xl bg-slate-50 flex items-center gap-3">
+                                   {isServiceInactive && (
+                             <div className="mt-2 text-xs text-red-600 font-semibold">
+                                Layanan ini sedang tidak aktif dan tidak dapat dibooking
+                             </div>
+                                    )}
+                                  
                                    <div className="p-2 bg-white rounded-lg text-blue-600"><FileText size={16}/></div>
                                    <div>
                                      <div className="text-sm font-bold text-slate-800">{selectedService.name}</div>
@@ -500,6 +508,8 @@ export default function BookingDoctorWeb() {
                                    </div>
                                 </div>
                              ) : <div className="text-sm text-red-500">Layanan tidak tersedia</div>}
+                            
+
                         </section>
                     </div>
 
@@ -603,7 +613,13 @@ export default function BookingDoctorWeb() {
                         </div>
                      </div>
                      <button
-                        disabled={loading || !form.date || !form.time_start || !selectedPayment}
+                      disabled={
+                       loading ||
+                       !form.date ||
+                       !form.time_start ||
+                       !selectedPayment ||
+                       isServiceInactive
+                         }
                         onClick={handleSubmit}
                         className={`px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg
                             ${loading || !form.date || !form.time_start || !selectedPayment

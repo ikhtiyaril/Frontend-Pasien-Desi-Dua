@@ -171,12 +171,12 @@ export default function DetailDoctor({ id }) {
                         <Star
                           key={i}
                           className={`w-5 h-5 ${
-                            i < 4 ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"
+                            i < 5 ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="text-sm text-gray-600 font-medium">4.8 (120 Reviews)</span>
+                    <span className="text-sm text-gray-600 font-medium">5.0 (120 Reviews)</span>
                   </div>
                 </div>
 

@@ -46,6 +46,8 @@ export default function OrdersDashboard({ initialFetch = true, pageSize = 20 }) 
   };
 const handlePay = async(id)=>{
     const token = await localStorage.getItem('token')
+    console.log("TESTING")
+    console.log(token,id)
     const response = await axios.get(
   `${API}/api/payment/session`,
   {

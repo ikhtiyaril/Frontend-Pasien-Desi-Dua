@@ -230,11 +230,11 @@ export default function DoctorList() {
                           <Star
                             key={i}
                             className={`w-4 h-4 ${
-                              i < 4 ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"
+                              i < 5 ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"
                             }`}
                           />
                         ))}
-                        <span className="text-xs text-gray-500 ml-1">(4.8)</span>
+                        <span className="text-xs text-gray-500 ml-1">(5.0)</span>
                       </div>
                     </div>
                   </div>
