@@ -3,204 +3,189 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import FloatingPayment from "./FloatingPayment";
 
-/**
- * Props:
- * - optional: initialFetch (boolean) => true by default
- * - optional: pageSize (number) => if later mau paginate
- */
-export default function OrdersDashboard({ initialFetch = true, pageSize = 20 }) {
+export default function OrdersDashboard({ initialFetch = true }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(initialFetch);
   const [error, setError] = useState("");
-  const [payment, setPayment] = useState(null)
-  const API = import.meta.env.VITE_API_URL; // contoh: "http://localhost:5000/api"
+  const [payment, setPayment] = useState(null);
+  const [expandedId, setExpandedId] = useState(null); // Untuk accordion detail
+
+  const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    if (!initialFetch) return;
-    fetchOrders();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (initialFetch) fetchOrders();
   }, []);
 
   const fetchOrders = async () => {
     setLoading(true);
     setError("");
     try {
-      const token = localStorage.getItem("token"); // pastikan token disimpan saat login
+      const token = localStorage.getItem("token");
       const res = await axios.get(`${API}/api/orders`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (res.data && res.data.orders) {
-        setOrders(res.data.orders);
-      } else {
-        setOrders([]);
-      }
+      setOrders(res.data?.orders || []);
     } catch (err) {
-      console.error(err);
-      setError("Gagal mengambil daftar order. Coba reload halaman.");
+      setError("Gagal mengambil daftar order.");
     } finally {
       setLoading(false);
     }
   };
-const handlePay = async(id)=>{
-    const token = await localStorage.getItem('token')
-    console.log("TESTING")
-    console.log(token,id)
-    const response = await axios.get(
-  `${API}/api/payment/session`,
-  {
-    params: { type: "order", id },
-    headers: { Authorization: `Bearer ${token}` }
-  }
-);
- console.log(response.data)
-setPayment(response.data.session.session_data.data);
 
-
-  }
-  
-  const formatCurrency = (value) => {
+  const handlePay = async (id) => {
     try {
-      // safe convert decimal string -> number
-      const num = Number(value);
-      return num.toLocaleString("id-ID", { style: "currency", currency: "IDR" });
-    } catch {
-      return value;
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${API}/api/payment/session`, {
+        params: { type: "order", id },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPayment(response.data.session.session_data.data);
+    } catch (err) {
+      alert("Gagal memproses pembayaran");
     }
   };
 
+  const formatCurrency = (v) => 
+    new Number(v).toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 });
+
+  // Badge untuk Status Logistik
   const statusBadge = (status) => {
-    const base = "px-3 py-1 rounded-full text-sm font-medium";
-    switch (status) {
-      case "pending":
-        return `${base} bg-yellow-100 text-yellow-800`;
-      case "paid":
-        return `${base} bg-blue-100 text-blue-800`;
-      case "cancelled":
-        return `${base} bg-red-100 text-red-800`;
-      case "delivered":
-        return `${base} bg-green-100 text-green-800`;
-      default:
-        return `${base} bg-gray-100 text-gray-800`;
-    }
+    const config = {
+      pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
+      processing: "bg-blue-100 text-blue-700 border-blue-200",
+      delivered: "bg-indigo-100 text-indigo-700 border-indigo-200",
+      completed: "bg-green-100 text-green-700 border-green-200",
+      cancelled: "bg-red-100 text-red-700 border-red-200",
+    };
+    return `px-2.5 py-0.5 rounded-full text-xs font-semibold border ${config[status] || "bg-gray-100"}`;
   };
 
-  if (loading) {
-    return (
-      <div className="w-full flex justify-center items-center py-12">
-        <div className="text-gray-500">Loading orders…</div>
-      </div>
-    );
-  }
+  // Badge untuk Status Pembayaran
+  const paymentBadge = (status) => {
+    const config = {
+      PAID: "text-green-600 bg-green-50",
+      UNPAID: "text-orange-600 bg-orange-50",
+      EXPIRED: "text-gray-500 bg-gray-50",
+      FAILED: "text-red-600 bg-red-50",
+    };
+    return `text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded ${config[status] || ""}`;
+  };
 
-  if (error) {
-    return (
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded">
-          {error}
-        </div>
-        <div className="mt-3">
-          <button
-            onClick={fetchOrders}
-            className="px-4 py-2 bg-gray-800 text-white rounded hover:opacity-90"
-          >
-            Coba lagi
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!orders || orders.length === 0) {
-    return (
-      <div className="max-w-4xl mx-auto p-6 text-center">
-        <div className="text-gray-500 mb-4">Belum ada order.</div>
-        <Link to="/shop" className="inline-block px-4 py-2 bg-indigo-600 text-white rounded">
-          Mulai belanja
-        </Link>
-      </div>
-    );
-  }
+  if (loading) return <div className="p-10 text-center text-gray-400">Memuat pesanan...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Riwayat Order</h2>
-        <button
-          onClick={fetchOrders}
-          className="text-sm px-3 py-1 bg-gray-100 rounded hover:bg-gray-200"
-        >
-          Refresh
+    <div className="max-w-5xl mx-auto p-4 md:p-6 bg-gray-50 min-h-screen">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Riwayat Pesanan</h1>
+          <p className="text-sm text-gray-500">Pantau status pengiriman dan pembayaran Anda</p>
+        </div>
+        <button onClick={fetchOrders} className="p-2 bg-white border rounded-lg hover:shadow-sm transition">
+          🔄
         </button>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {orders.map((order) => (
-          <div
-            key={order.id}
-            className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between bg-white shadow-sm"
-          >
-            <div className="flex-1">
-              <div className="flex items-start gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-medium">Order #{order.id}</h3>
-                    <span className={statusBadge(order.status)}>{order.status}</span>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Dibuat: {new Date(order.createdAt).toLocaleString()}
-                  </p>
+          <div key={order.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            {/* --- HEADER CARD --- */}
+            <div className="p-4 flex flex-wrap items-center justify-between gap-4 border-b border-gray-50">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-mono font-bold text-indigo-600">{order.order_code}</span>
+                  <span className={statusBadge(order.status)}>{order.status}</span>
                 </div>
-
-                <div className="text-right">
-                  <div className="text-sm text-gray-500">Total</div>
-                  <div className="text-lg font-semibold">
-                    {formatCurrency(order.total_price)}
-                  </div>
-                </div>
+                <p className="text-xs text-gray-400">{new Date(order.createdAt).toLocaleDateString('id-ID', { dateStyle: 'long' })}</p>
               </div>
-
-              {/* Ringkasan item (1-2 item preview) */}
-              <div className="mt-3">
-                <div className="text-sm text-gray-600">
-                  {order.items && order.items.length > 0 ? (
-                    <>
-                      <span className="font-medium">{order.items.length}</span> item •{" "}
-                      <span>{order.items.slice(0, 2).map(i => i.product?.name || "Produk").join(", ")}
-                        {order.items.length > 2 ? ` +${order.items.length - 2} lainnya` : ""}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-gray-400">Tidak ada item tercatat</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 md:mt-0 md:ml-4 flex items-center gap-2">
               
-              {order.status === "pending" && (
-                <button
-                  onClick={() => handlePay(order.id)}
-                  className="px-3 py-2 text-sm border rounded hover:bg-gray-50"
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-xs text-gray-400 uppercase">Total Tagihan</p>
+                  <p className="font-bold text-gray-800">{formatCurrency(order.total_price)}</p>
+                </div>
+                <button 
+                  onClick={() => setExpandedId(expandedId === order.id ? null : order.id)}
+                  className="text-gray-400 hover:text-gray-600 p-1"
                 >
-                  Bayar
+                  {expandedId === order.id ? "▲" : "▼"}
                 </button>
-              )}
+              </div>
             </div>
+
+            {/* --- QUICK INFO (Visible) --- */}
+            <div className="px-4 py-3 bg-white flex flex-col md:flex-row md:items-center justify-between gap-3">
+               <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span className="font-medium">💳 Pembayaran:</span>
+                  <span className={paymentBadge(order.payment_status)}>{order.payment_status}</span>
+                  <span className="text-gray-300">|</span>
+                  <span className="font-medium">📦 Kurir:</span>
+                  <span className="capitalize">{order.ekspedition || '-'}</span>
+               </div>
+               
+               {order.payment_status === "UNPAID" && order.status === "pending" && (
+                 <button
+                   onClick={() => handlePay(order.id)}
+                   className="bg-indigo-600 text-white px-6 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition"
+                 >
+                   Bayar Sekarang
+                 </button>
+               )}
+            </div>
+
+            {/* --- EXPANDED DETAILS --- */}
+            {expandedId === order.id && (
+              <div className="p-4 bg-gray-50 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-6 animate-fadeIn">
+                
+                {/* 1. Produk */}
+                <div className="md:col-span-1">
+                  <h4 className="text-xs font-bold uppercase text-gray-400 mb-2">Item Pesanan</h4>
+                  <div className="space-y-2">
+                    {order.items?.map((item, idx) => (
+                      <div key={idx} className="flex justify-between text-sm">
+                        <span className="text-gray-700">{item.product?.name} <small className="text-gray-400">x{item.quantity}</small></span>
+                        <span className="font-medium">{formatCurrency(item.price)}</span>
+                      </div>
+                    ))}
+                    <div className="border-t pt-2 mt-2 flex justify-between text-sm font-bold text-gray-800">
+                      <span>Ongkos Kirim</span>
+                      <span>{formatCurrency(order.shipping_cost || 0)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Pengiriman & Resi */}
+                <div>
+                  <h4 className="text-xs font-bold uppercase text-gray-400 mb-2">Informasi Pengiriman</h4>
+                  <div className="bg-white p-3 rounded-lg border border-gray-200 text-sm space-y-2">
+                    <div>
+                      <p className="text-[10px] text-gray-400 uppercase">No. Resi</p>
+                      <p className="font-mono font-bold text-indigo-600">{order.no_resi || "Belum tersedia"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-400 uppercase">Metode Pembayaran</p>
+                      <p className="font-medium uppercase">{order.payment_method || "Belum dipilih"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Alamat Lengkap */}
+                <div>
+                  <h4 className="text-xs font-bold uppercase text-gray-400 mb-2">Alamat Tujuan</h4>
+                  <div className="text-sm text-gray-600 leading-relaxed">
+                    <p className="font-bold text-gray-800 mb-1">{order.user?.name || 'Penerima'}</p>
+                    <p>{order.address_detail}</p>
+                    <p>{order.village}, {order.district}</p>
+                    <p>{order.regency}, {order.province}</p>
+                  </div>
+                </div>
+
+              </div>
+            )}
           </div>
         ))}
       </div>
-      {payment && (
-               <FloatingPayment
-                        payment={payment}
-                        onClose={() => setPayment(null)}
-                      />
-            )
-      
-            }
+
+      {payment && <FloatingPayment payment={payment} onClose={() => setPayment(null)} />}
     </div>
   );
 }

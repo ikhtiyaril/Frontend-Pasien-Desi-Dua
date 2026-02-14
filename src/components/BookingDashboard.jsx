@@ -192,7 +192,7 @@ console.log(res.data)
               )}
 
               {/* JOIN TELEMEDICINE */}
-              {b.Service?.is_live && b.payment_status === 'paid' && b.status === 'Completed' && (
+              {b.Service?.is_live && b.payment_status === 'paid' && b.status === 'confirmed' && (
                 <button
                   onClick={() => handleJoin(b.id)}
                   className="

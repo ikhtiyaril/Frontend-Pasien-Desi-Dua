@@ -208,6 +208,7 @@ export default function Checkout() {
 
     setIsProcessing(true);
     try {
+      console.log(finalTotal)
       // 1) create order
       const orderBody = {
         items: cart,
