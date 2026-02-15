@@ -1,7 +1,30 @@
-import React from "react";
+import React,{useEffect,useState} from "react";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios'
+ 
 
 const Landing = () => {
+const [userLog, setUserLog] = useState(false);
+
+  const [clinicData,setClinicData] = useState(null)
+const API_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setUserLog(!!token);
+
+    const fetchClinic = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/clinic-profile`);
+        if (res.data) setClinicData(res.data);
+      } catch (err) {
+        console.error("Failed to fetch clinic data:", err);
+      }
+    };
+
+    fetchClinic();
+  }, []);
+
   const navigation = useNavigate()
   return (
     <div className="w-full bg-linear-to-b from-blue-600 to-blue-800 text-white">
@@ -12,13 +35,13 @@ const Landing = () => {
         {/* LEFT TEXT */}
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4">
-            Your Health,{" "}
-            <span className="text-blue-200">Connected in One App</span>
+            
+            <span className="text-blue-200">{clinicData?.shortDescription || 'Connected in One App'}</span>
           </h1>
 
           <p className="text-blue-100 text-base sm:text-lg md:text-xl mb-8">
-            A seamless digital clinic designed for easy consultations, online
-            booking, medicine access, and trusted health education.
+            {clinicData?.longDescription || `A seamless digital clinic designed for easy consultations, online
+            booking, medicine access, and trusted health education.`}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 sm:justify-center md:justify-start">

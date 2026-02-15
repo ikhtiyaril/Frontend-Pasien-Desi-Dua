@@ -81,7 +81,7 @@ const TikTokTestimoni = () => {
             <div className="flex flex-col items-center text-center">
               <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-blue-500 mb-6 shadow-md">
                 <div className="w-full h-full bg-blue-50 flex items-center justify-center">
-                <img src="Saverina.jpg" alt="" />
+                <img src="dr.saverina2.jpeg" alt="" />
                 </div>
               </div>
 

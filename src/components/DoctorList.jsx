@@ -42,7 +42,12 @@ export default function DoctorList() {
     }
   };
 
-  const filteredDoctors = doctors.filter((doctor) => {
+  const filteredDoctors = doctors
+  .filter(
+    (doctor) =>
+      doctor.name?.toLowerCase() !== "pelayan klinik"
+  )
+  .filter((doctor) => {
     const byName = doctor.name
       ?.toLowerCase()
       .includes(search.toLowerCase());

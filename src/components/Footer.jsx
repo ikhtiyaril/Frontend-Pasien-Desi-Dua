@@ -72,7 +72,7 @@ export default function Footer() {
             </li>
             <li>
               <strong>Jam Operasional:</strong><br />
-              Senin–Sabtu: {operationalHours?.monday || "08.00"}–{operationalHours?.saturday || "20.00"}
+              Senin–Sabtu: {operationalHours?.monday || "08.00"}–{operationalHours?.saturday || "22.00"}
             </li>
             <li>
               <strong>WhatsApp:</strong> <span className="text-blue-600">{contact?.phone || "-"}</span>

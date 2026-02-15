@@ -13,6 +13,7 @@ const Header = () => {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [clinicData,setClinicData] = useState(null)
 
   const navigate = useNavigate();
   const searchRef = useRef(null);
@@ -21,6 +22,17 @@ const Header = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     setUserLog(!!token);
+
+    const fetchClinic = async () => {
+      try {
+        const res = await axios.get(`${API}/api/clinic-profile`);
+        if (res.data) setClinicData(res.data);
+      } catch (err) {
+        console.error("Failed to fetch clinic data:", err);
+      }
+    };
+
+    fetchClinic();
   }, []);
 
   useEffect(() => {
@@ -98,8 +110,8 @@ const Header = () => {
           <div className="flex justify-between items-center text-xs sm:text-sm text-white">
             <div className="flex items-center gap-2 sm:gap-4">
               <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Hubungi Kami: 0800-123-4567</span>
-              <span className="sm:hidden">0811-8000-2350</span>
+              <span className="hidden sm:inline">Hubungi Kami: {clinicData?.contact?.phone || `0811-8000-2350`}</span>
+              <span className="sm:hidden">{clinicData?.contact?.phone || `0811-8000-2350`}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
