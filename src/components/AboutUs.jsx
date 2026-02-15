@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState} from "react";
 import { 
   Heart, 
   Shield, 
@@ -18,6 +18,20 @@ import { useNavigate } from "react-router-dom";
 
 export default function AboutUs() {
 const navigate = useNavigate()
+  const images = [
+    "/dr.saverina2.jpeg",
+    "/dr.lauren.jpeg",
+  ];
+
+  const [current, setCurrent] = useState(0);
+
+  const prevSlide = () => {
+    setCurrent(current === 0 ? images.length - 1 : current - 1);
+  };
+
+  const nextSlide = () => {
+    setCurrent(current === images.length - 1 ? 0 : current + 1);
+  };
 
 
   return (
@@ -49,7 +63,7 @@ const navigate = useNavigate()
   <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border border-white/40">
     <div className="aspect-video relative">
       <img
-        src="Footage-3-DD.jpeg"
+        src="Desidua-ft1.jpeg"
         alt="Dokter Severina Adella"
         className="absolute inset-0  w-full h-full object-cover"
       />
@@ -156,7 +170,7 @@ const navigate = useNavigate()
                 <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 via-blue-50 to-slate-100 flex items-center justify-center relative">
                   
       <img
-        src="Footage-2-DD.jpeg"
+        src="Desidua-ft3.jpeg"
         alt="Dokter Severina Adella"
         className="absolute inset-0  w-full h-full object-cover"
       />
@@ -177,7 +191,7 @@ const navigate = useNavigate()
               <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-100">
                 <div className=" realative aspect-[4/3] bg-gradient-to-br from-slate-100 via-blue-50 to-blue-100 flex items-center justify-center">
                   <img
-        src="Footage-4-DD.jpeg"
+        src="Desidua-ft4.jpeg"
         alt="Dokter Severina Adella"
         className="absolute inset-0  w-full h-full object-cover"
       />
@@ -330,20 +344,53 @@ const navigate = useNavigate()
               </div>
             </div>
 
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-blue-700/20 rounded-3xl transform rotate-3"></div>
-              <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-100">
-                <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 via-slate-50 to-blue-200 flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <img
-        src="Saverina.jpg"
-        alt="Dokter Severina Adella"
-        className="absolute inset-0  w-full h-full object-cover"
-      />
-                  </div>
-                </div>
-              </div>
-            </div>
+           <div className="relative w-full max-w-lg mx-auto">
+      
+      {/* Background Effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-blue-700/20 rounded-3xl transform rotate-3"></div>
+
+      {/* Card */}
+      <div className="relative bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-blue-100">
+        
+        {/* Image Wrapper */}
+        <div className="relative aspect-[4/3]">
+          <img
+            src={images[current]}
+            alt="Gallery"
+            className="w-full h-full object-cover transition-all duration-500"
+          />
+
+          {/* Button Prev */}
+          <button
+            onClick={prevSlide}
+            className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur p-2 rounded-full shadow hover:bg-white"
+          >
+            ◀
+          </button>
+
+          {/* Button Next */}
+          <button
+            onClick={nextSlide}
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur p-2 rounded-full shadow hover:bg-white"
+          >
+            ▶
+          </button>
+        </div>
+
+        {/* Indicator Dots */}
+        <div className="flex justify-center gap-2 py-4">
+          {images.map((_, index) => (
+            <div
+              key={index}
+              onClick={() => setCurrent(index)}
+              className={`h-3 w-3 rounded-full cursor-pointer ${
+                current === index ? "bg-blue-600" : "bg-gray-300"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
           </div>
         </div>
       </section>
