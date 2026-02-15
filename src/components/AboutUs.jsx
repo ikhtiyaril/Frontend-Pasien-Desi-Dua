@@ -155,7 +155,7 @@ const navigate = useNavigate()
                     <div>
                       <h3 className="font-bold text-gray-900 mb-2">Misi</h3>
                       <p className="text-gray-600">
-                        Memberikan layanan holistik berbasis ilmu, edukasi keluarga, perawatan pasca persalinan, pemulihan kesehatan reproduksi, dan tumbuh kembang anak secara optimal.
+                        Memberikan layanan holistik berbasis edukasi ilmu, edukasi keluarga, perawatan pasca persalinan, pemulihan kesehatan reproduksi, dan tumbuh kembang anak secara optimal.
                       </p>
                     </div>
                   </div>
