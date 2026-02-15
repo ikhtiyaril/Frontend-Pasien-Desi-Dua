@@ -51,7 +51,7 @@ const navigate = useNavigate()
               Klinik Desidua
             </h1>
             <p className="text-lg sm:text-xl max-w-3xl mx-auto text-blue-100 leading-relaxed">
-              Melindungi dan mendukung kehidupan sejak awal dengan layanan kesehatan yang profesional ,terpercaya, aman, dan penuh perhatian
+              Melindungi dan mendukung kehidupan sejak awal dengan layanan kesehatan yang terpercaya, profesional , aman, dan penuh perhatian
             </p>
           </div>
 
