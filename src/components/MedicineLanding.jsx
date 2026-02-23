@@ -17,18 +17,14 @@ export default function MedicineLanding() {
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 
-  const categoriess = [
-    { id: 1, label: "Vitamin & Suplemen" },
-    { id: 2, label: "Kecantikan & Perawatan Diri" },
-    { id: 3, label: "Kesehatan Seksual" },
-  ];
-
+  
 const fetchCategories = async () => {
     try {
       setLoading(true);
       const res = await axios.get(`${API_BASE_URL}/api/categories`);
       console.log(res.data.data)
-      setCategories(res.data.data);
+      const categ = res.data.data
+      setCategories(categ.slice(0,6));
     } catch (err) {
       console.error("Failed to fetch categories:", err);
     } finally {
@@ -37,17 +33,25 @@ const fetchCategories = async () => {
   };
 
   const fetchMedicines = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${API_BASE_URL}/api/medicine/products`);
-      console.log(res.data.data)
-      setMedicines(res.data.data);
-    } catch (err) {
-      console.error("Failed to fetch medicines:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    const res = await axios.get(`${API_BASE_URL}/api/medicine/products`);
+    const medic = res.data.data;
+
+    const filtered = medic.filter(
+      (item) => item.categoryId === category
+    );
+
+setMedicines(
+      filtered.length > 0
+        ? filtered.slice(0, 8)
+        : medic.slice(0, 8)
+    );  } catch (err) {
+    console.error("Failed to fetch medicines:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchMedicines();
