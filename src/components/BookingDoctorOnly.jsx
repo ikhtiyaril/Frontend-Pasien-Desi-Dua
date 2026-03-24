@@ -158,8 +158,8 @@ export default function BookingDoctorWeb() {
 
   const fetchPaymentMethods = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/payment`);
-      setPaymentMethods(res.data.data?.data || []);
+      // const res = await axios.get(`${API_URL}/api/payment`);
+      // setPaymentMethods(res.data.data?.data || []);
     } catch (error) {
       console.error('Error fetching payment methods:', error);
     }
@@ -279,39 +279,135 @@ export default function BookingDoctorWeb() {
   };
 
   const handleSubmit = async () => {
-    if (!form.date || !form.time_start) return alert('Tanggal & jam wajib diisi');
-    if (!selectedPayment) return alert('Pilih metode pembayaran');
-    if (!selectedService) return alert('Service tidak tersedia');
 
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(`${API_URL}/api/booking`, form, {
+  
+
+  // VALIDATION
+  if (!form.date || !form.time_start) {
+    console.log("❌ VALIDATION FAILED: DATE/TIME");
+    return alert('Tanggal & jam wajib diisi');
+  }
+
+  if (!selectedService) {
+    console.log("❌ VALIDATION FAILED: SERVICE");
+    return alert('Service tidak tersedia');
+  }
+
+  setLoading(true);
+
+  try {
+
+    const token = localStorage.getItem('token');
+
+   
+
+
+    // =========================================
+    // CREATE BOOKING
+    // =========================================
+
+   
+
+    const bookingStart = Date.now();
+
+    const res = await axios.post(
+      `${API_URL}/api/booking`,
+      form,
+      {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      }
+    );
 
-      const paymentPayload = {
-        method: selectedPayment.code,
-        merchant_ref: res.data.booking.booking_code,
-        amount: selectedService.price,
-        order_items: [
-          { name: selectedService.name, price: selectedService.price, quantity: 1 },
-        ],
-        id: res.data.booking.id,
-      };
+    const bookingDuration = Date.now() - bookingStart;
 
-      const response = await axios.post(`${API_URL}/api/payment`, paymentPayload, {
+   
+
+
+    const booking = res.data.booking;
+
+    
+
+
+    // =========================================
+    // BUILD PAYMENT PAYLOAD
+    // =========================================
+
+    const paymentPayload = {
+      // method: selectedPayment?.code,
+      merchant_ref: booking.booking_code,
+      amount: selectedService.price,
+      order_items: [
+        {
+          name: selectedService.name,
+          price: selectedService.price,
+          quantity: 1
+        }
+      ],
+      id: booking.id,
+    };
+
+    // console.log("\n💰 PAYMENT PAYLOAD:");
+    // console.dir(paymentPayload, { depth: null });
+
+
+    // =========================================
+    // CALL PAYMENT API
+    // =========================================
+
+   
+
+    const paymentStart = Date.now();
+
+    const response = await axios.post(
+      `${API_URL}/api/paymentXendit`,
+      paymentPayload,
+      {
         headers: { Authorization: `Bearer ${token}` },
-      });
+      }
+    );
 
-      setPayment(response.data.data);
-      alert('Booking Berhasil');
-    } catch (err) {
-      alert(err.response?.data?.message || 'Terjadi kesalahan');
-    } finally {
-      setLoading(false);
+    const paymentDuration = Date.now() - paymentStart;
+
+   
+
+
+    setPayment(response.data.data);
+
+    
+    alert('Booking Berhasil');
+    window.location.replace(response.data.data.invoice_url)
+  } catch (err) {
+
+    console.log("\n=================================");
+    console.log("❌ ERROR IN BOOKING FLOW");
+    console.log("=================================");
+
+    console.log("MESSAGE:", err.message);
+
+    if (err.response) {
+
+      console.log("\n📡 SERVER RESPONSE ERROR");
+      console.log("Status:", err.response.status);
+
+      console.log("Body:");
+      console.dir(err.response.data, { depth: null });
+
     }
-  };
+
+    console.log("\nSTACK:");
+    console.error(err.stack);
+
+    alert(err.response?.data?.message || 'Terjadi kesalahan');
+
+  } finally {
+
+    console.log("\n🏁 BOOKING FLOW END\n");
+
+    setLoading(false);
+
+  }
+
+};
 
   const filteredDoctors = doctors.filter((d) =>
     `${d.name} ${d.specialization || ''}`.toLowerCase().includes(query.toLowerCase())
@@ -565,7 +661,18 @@ const isServiceInactive = selectedService && selectedService.active === false;
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                          <section>
                             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pembayaran</h3>
-                            <div className="grid grid-cols-1 gap-2 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+    <div className="text-sm font-semibold text-slate-800 mb-1">
+        Metode Pembayaran
+    </div>
+    
+    <div className="text-xs text-slate-600">
+        Pemilihan metode pembayaran dilakukan setelah proses booking selesai.
+        Silakan lanjutkan booking terlebih dahulu, kemudian pilih metode pembayaran
+        pada halaman berikutnya.
+    </div>
+</div>
+                            {/*PUNYA TRIPAY <div className="grid grid-cols-1 gap-2 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar">
                                 {paymentMethods.map((m) => (
                                     <button
                                         key={m.code}
@@ -586,7 +693,7 @@ const isServiceInactive = selectedService && selectedService.active === false;
                                         {selectedPayment?.code === m.code && <div className="w-4 h-4 rounded-full bg-blue-600 flex items-center justify-center"><CheckCircle2 size={10} className="text-white"/></div>}
                                     </button>
                                 ))}
-                            </div>
+                            </div> */}
                          </section>
 
                          <section>
@@ -617,12 +724,12 @@ const isServiceInactive = selectedService && selectedService.active === false;
                        loading ||
                        !form.date ||
                        !form.time_start ||
-                       !selectedPayment ||
+                      //  !selectedPayment ||
                        isServiceInactive
                          }
                         onClick={handleSubmit}
                         className={`px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-lg
-                            ${loading || !form.date || !form.time_start || !selectedPayment
+                            ${loading || !form.date || !form.time_start 
                                 ? 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
                                 : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-blue-200 hover:-translate-y-0.5'
                             }

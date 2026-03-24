@@ -70,7 +70,7 @@ export default function BookingService({ service, onSelect }) {
           <p className="mt-2 text-sm text-gray-500 leading-relaxed line-clamp-2">
             {description || "Layanan kesehatan profesional untuk kebutuhan medis Anda."}
           </p>
-          <a href={`/article/${article.slug}`} className="mt-2 text-sm text-blue-500 leading-relaxed line-clamp-2">Info Lebih Lanjut</a>
+          <a href={`/article/${article?.slug}`} className="mt-2 text-sm text-blue-500 leading-relaxed line-clamp-2">Info Lebih Lanjut</a>
         </div>
 
         {/* --- FOOTER INFO --- */}

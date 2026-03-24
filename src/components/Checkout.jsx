@@ -188,95 +188,103 @@ export default function Checkout() {
   // CHECKOUT
   // =============================
   const handleCheckout = async () => {
-    if (isProcessing) return;
-    // Validasi alamat
-    if (!province || !regency || !district || !village || !addressDetail) {
-      return alert("Lengkapi alamat pengiriman");
-    }
+  if (isProcessing) return;
 
-    if (!selectedCourier) {
-      return alert("Pilih jasa pengiriman");
-    }
-
-    if (!paymentMethod) {
-      return alert("Pilih metode pembayaran");
-    }
-
-    if (!cart || cart.length === 0) {
-      return alert("Keranjang kosong");
-    }
-
-    setIsProcessing(true);
-    try {
-      console.log(finalTotal)
-      // 1) create order
-      const orderBody = {
-        items: cart,
-        total_price: finalTotal,
-        shipping: {
-          // kirim kode courier dan nama supaya backend aman
-          courier_code: selectedCourier.courier_code ?? selectedCourier.code ?? null,
-          courier_name: selectedCourier.courier_name ?? selectedCourier.name ?? null,
-          cost: shippingCost,
-        },
-        shipping_address: {
-          province,
-          regency,
-          district,
-          village,
-          address_detail: addressDetail,
-        },
-        payment_method: paymentMethod,
-      };
-
-      const orderRes = await axios.post(`${API}/api/orders/create`, orderBody, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const order = orderRes.data?.order || orderRes.data?.data || null;
-      if (!order) {
-        throw new Error("Gagal membuat order");
-      }
-
-      // 2) call payment checkout
-      const paymentRes = await axios.post(
-        `${API}/api/payment/checkout`,
-        {
-          reference: order.order_code ?? order.orderCode ?? order.code ?? order.id,
-          paymentMethod,
-          amount: subtotal,
-          shipping_cost: shippingCost,
-          fee_customer: tripayFee,
-          orderItems: cart.map((item) => ({
-            name: item.product?.name,
-            price: item.product?.price,
-            quantity: item.quantity,
-          })),
-          id: order.id,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const paymentData = paymentRes.data?.data?.data || paymentRes.data?.data || null;
-      if (!paymentData) {
-        throw new Error("Gagal melakukan pembayaran");
-      }
-
-      setPaymentTransaction(paymentData);
-      // scroll to top so user sees floating payment if it's at top
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
-      console.error("Checkout error:", err);
-      alert("Checkout gagal. Silakan coba lagi.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  if (loading) {
-    return <p className="text-center mt-10">Loading...</p>;
+  // VALIDASI
+  if (!province || !regency || !district || !village || !addressDetail) {
+    return alert("Lengkapi alamat pengiriman");
   }
 
+  if (!selectedCourier) {
+    return alert("Pilih jasa pengiriman");
+  }
+
+  if (!paymentMethod) {
+    return alert("Pilih metode pembayaran");
+  }
+
+  if (!cart || cart.length === 0) {
+    return alert("Keranjang kosong");
+  }
+
+  setIsProcessing(true);
+
+  try {
+    // =========================
+    // 1. CREATE ORDER
+    // =========================
+    const orderBody = {
+      items: cart, // ini masih oke buat create order
+      shipping: {
+        courier_code: selectedCourier.courier_code ?? selectedCourier.code ?? null,
+        courier_name: selectedCourier.courier_name ?? selectedCourier.name ?? null,
+        cost: shippingCost,
+      },
+      shipping_address: {
+        province,
+        regency,
+        district,
+        village,
+        address_detail: addressDetail,
+      },
+      payment_method: paymentMethod,
+    };
+
+    const orderRes = await axios.post(
+      `${API}/api/orders/create`,
+      orderBody,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const order = orderRes.data?.order || orderRes.data?.data || null;
+
+    if (!order) {
+      throw new Error("Gagal membuat order");
+    }
+
+    // =========================
+    // 2. PAYMENT CHECKOUT
+    // =========================
+    const paymentRes = await axios.post(
+      `${API}/api/paymentXendit/checkout`,
+      {
+        id: order.id,
+        reference:
+          order.order_code ??
+          order.orderCode ??
+          order.code ??
+          `ORDER-${order.id}`,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const paymentData =
+      paymentRes.data?.data?.data || paymentRes.data?.data || null;
+
+    if (!paymentData) {
+      throw new Error("Gagal membuat pembayaran");
+    }
+    window.location.href = paymentRes.data?.data.invoice_url;
+    
+    // =========================
+    // 3. SET PAYMENT UI
+    // =========================
+
+    setPaymentTransaction(paymentData);
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+  } catch (err) {
+    console.error("Checkout error:", err);
+    alert("Checkout gagal. Silakan coba lagi.");
+  } finally {
+    setIsProcessing(false);
+  }
+};
   // =============================
   // UI
   // =============================

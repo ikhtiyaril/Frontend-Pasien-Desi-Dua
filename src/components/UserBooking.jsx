@@ -29,6 +29,8 @@ export default function UserBooking() {
   const [doctors, setDoctors] = useState([]);
   const [availableDoctors, setAvailableDoctors] = useState([]);
   const [payment,setPayment] = useState([])
+const [loading,setLoading] = useState(false)
+
 
   const [duration, setDuration] = useState(0);
   const [doctorSchedule, setDoctorSchedule] = useState(null);
@@ -240,55 +242,120 @@ const generateSlots = () => {
   // =====================
   // SUBMIT
   // =====================
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  const token = localStorage.getItem("token");
+ const handleSubmit = async () => {
+  if (loading) return; // 🔒 anti double click
+
+  // VALIDATION
+  if (!form.date || !form.time_start) {
+    console.log("❌ VALIDATION FAILED: DATE/TIME");
+    return alert("Tanggal & jam wajib diisi");
+  }
+
+  if (!selectedService) {
+    console.log("❌ VALIDATION FAILED: SERVICE");
+    return alert("Service tidak tersedia");
+  }
+
+  setLoading(true);
 
   try {
-    const res = await axios.post(`${API}/api/booking`, form, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const token = localStorage.getItem("token");
 
-    alert("Booking berhasil dibuat!");
+    // =========================================
+    // CREATE BOOKING
+    // =========================================
+    const bookingStart = Date.now();
 
-    setForm({
-      service_id: "",
-      doctor_id: "",
-      date: "",
-      time_start: "",
-      notes: "",
-    });
-    console.log(res.data.booking)
-console.log("info payment:", JSON.stringify(calculatorData[0].total_fee.merchant));
-    // 🔥 Build payment payload LANGSUNG di sini
+    const res = await axios.post(
+      `${API}/api/booking`,
+      form,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000, // ⏱ biar gak ngegantung
+      }
+    );
+
+    const bookingDuration = Date.now() - bookingStart;
+    console.log("⏱ Booking duration:", bookingDuration, "ms");
+
+    const booking = res.data.booking;
+
+    if (!booking) {
+      throw new Error("Booking gagal dibuat");
+    }
+
+    // =========================================
+    // BUILD PAYMENT PAYLOAD (XENDIT)
+    // =========================================
+    const price = selectedService?.price || 0;
+
+    if (price <= 0) {
+      throw new Error("Harga service tidak valid");
+    }
+
     const paymentPayload = {
-      method: paymentMethod,
-      merchant_ref: res.data.booking.booking_code,
-      amount: selectedService.price + calculatorData[0].total_fee.merchant,
+      merchant_ref: booking.booking_code,
+      amount: price,
       order_items: [
         {
           name: selectedService.name,
-          price: selectedService.price+calculatorData[0].total_fee.merchant,
+          price: price,
           quantity: 1,
         },
       ],
-      id: res.data.booking.id
+      id: booking.id,
     };
 
-    // 🔥 Kirim payload-nya, bukan state paymentData
-    const response = await axios.post(`${API}/api/payment`, paymentPayload, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    // =========================================
+    // CALL PAYMENT API (XENDIT)
+    // =========================================
+    const paymentStart = Date.now();
 
-    console.log(response.data)
-    setPaymentTransaction(response.data.data);
+    const response = await axios.post(
+      `${API}/api/paymentXendit`,
+      paymentPayload,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+       
+      }
+    );
 
-    setAvailableDoctors([]);
-    setSlots([]);
+    const paymentDuration = Date.now() - paymentStart;
+    console.log("⏱ Payment duration:", paymentDuration, "ms");
+
+    const invoice = response.data?.data;
+
+    if (!invoice?.invoice_url) {
+      throw new Error("Invoice URL tidak ditemukan");
+    }
+
+    setPayment(invoice);
+
+    alert("Booking Berhasil");
+
+    // redirect lebih aman
+    window.location.href = invoice.invoice_url;
+
   } catch (err) {
-    alert(err.response?.data?.message || "Gagal membuat booking" + err);
+    console.log("\n=================================");
+    console.log("❌ ERROR IN BOOKING FLOW");
+    console.log("=================================");
+
+    console.log("MESSAGE:", err.message);
+
+    if (err.response) {
+      console.log("\n📡 SERVER RESPONSE ERROR");
+      console.log("Status:", err.response.status);
+      console.dir(err.response.data, { depth: null });
+    }
+
+    console.error("\nSTACK:", err.stack);
+
+    alert(err.response?.data?.message || err.message || "Terjadi kesalahan");
+
+  } finally {
+    console.log("\n🏁 BOOKING FLOW END\n");
+    setLoading(false);
   }
 };
 
@@ -436,14 +503,14 @@ const calculatorPrice = async () =>{
           />
         </div>
 
- <PaymentMethodCheckbox
+ {/* <PaymentMethodCheckbox
   data={payment}
   selectedMethod={paymentMethod}
   onChange={(val) => {setPaymentMethod(val)}}
-/>
+/> */}
 
         <button onClick={handleSubmit} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold">
-          Buat Booking
+          {loading ? "Loading" : "Buat Booking"}
         </button>
       </div>
      
@@ -462,7 +529,7 @@ const calculatorPrice = async () =>{
     <div className="grid grid-cols-1 gap-4">
       {services.map((s) => (
        <BookingService
-      key={s.id}
+      key={s?.id}
       service={s}
       onSelect={chooseService}
     />
@@ -581,10 +648,20 @@ const calculatorPrice = async () =>{
 )}
 
 {paymentTime && !paymentMethod && (
-  <div className="p-6" >
-      <h1 className="text-2xl font-bold mb-6 text-blue-600">Metode Pembayaran</h1>
-      <PaymentMethodList data={payment} />
+  <div className="p-6 bg-white rounded-xl shadow-md border border-blue-100">
+    <h1 className="text-xl font-bold text-blue-600 mb-2">
+      Metode Pembayaran
+    </h1>
+
+    <p className="text-gray-600 text-sm leading-relaxed">
+      Pilihan metode pembayaran akan tersedia setelah Anda menyelesaikan proses booking.
+    </p>
+
+    <div className="mt-4 flex items-center gap-2 text-blue-500 text-sm">
+      <CheckCircle size={16} />
+      <span>Lengkapi data booking terlebih dahulu</span>
     </div>
+  </div>
 )}
 
 {

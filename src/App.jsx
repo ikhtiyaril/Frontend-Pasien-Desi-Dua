@@ -29,6 +29,7 @@ import VerifyEmail from './pages/VerifyOtpPages'
 import BookingDoctorOnlyPages from './pages/BookingDoctorOnlyPages'
 import PrivacyPolicyPages from './pages/PrivacyPolicyPages'
 import TermsOfServicePages from './pages/TermsOfServicePages'
+import TesXendit from './pages/TesXendit'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -62,6 +63,8 @@ function App() {
         <Route path="/doctor-booking" element={<BookingDoctorOnlyPages/>}/>
         <Route path="/privacy-policy" element={<PrivacyPolicyPages/>}/>
         <Route path="/terms-of-service" element={<TermsOfServicePages/>}/>
+        <Route path="/tes-xendit" element={<TesXendit/>}/>
+
 
 
 
