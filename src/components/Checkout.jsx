@@ -231,12 +231,14 @@ export default function Checkout() {
     };
 
     const orderRes = await axios.post(
-      `${API}/api/orders/create`,
-      orderBody,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+  `${API}/api/checkout`,
+  {
+    payment_method: paymentMethod
+  },
+  {
+    headers: { Authorization: `Bearer ${token}` },
+  }
+);
 
     const order = orderRes.data?.order || orderRes.data?.data || null;
 
@@ -250,12 +252,21 @@ export default function Checkout() {
     const paymentRes = await axios.post(
       `${API}/api/paymentXendit/checkout`,
       {
-        id: order.id,
-        reference:
-          order.order_code ??
-          order.orderCode ??
-          order.code ??
-          `ORDER-${order.id}`,
+         id: order.id,
+    reference:
+      order.order_code ??
+      order.orderCode ??
+      order.code ??
+      `ORDER-${order.id}`,
+
+    amount: subtotal,
+    shipping_cost: shippingCost,
+
+    orderItems: cart.map(i => ({
+      name: i.product?.name,
+      price: i.product?.price,
+      quantity: i.quantity
+    }))
       },
       {
         headers: { Authorization: `Bearer ${token}` },
