@@ -60,7 +60,7 @@ export default function BookingDashboard() {
       });
       console.log("HANDLE PAY ONCLICK")
 console.log(res.data)
-      setPayment(res.data.session.session_data.data);
+      setPayment(res.data.session.session_data);
     } catch (err) {
       console.log("Payment error:", err);
     }

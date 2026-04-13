@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import RequestPrescriptionModal from "../components/RequestPrescriptionModal";
+import RequestPrescriptionModal from "./RequestPrescriptionModal";
 
 const API = import.meta.env.VITE_API_URL;
 

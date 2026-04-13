@@ -54,9 +54,8 @@ const API_URL = import.meta.env.VITE_API_URL;
           </div>
         </div>
 
-        {/* RIGHT SIDE */}
+        {/*
         <div className="flex-1 relative hidden md:flex justify-center">
-          {/* Desktop floating cards */}
           <div className="bg-white text-blue-800 w-64 p-4 rounded-2xl shadow-xl absolute -top-6 -right-2 rotate-3">
             <p className="font-semibold">Live Consultation</p>
             <p className="text-sm opacity-70">
@@ -84,7 +83,7 @@ const API_URL = import.meta.env.VITE_API_URL;
               Daily health insights
             </p>
           </div>
-        </div>
+        </div> */}
 
       
       </div>
@@ -93,8 +92,8 @@ const API_URL = import.meta.env.VITE_API_URL;
       <div className="bg-white text-blue-900 py-16">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            ["Live Consultation", "Video call langsung dengan dokter pilihan Anda.","/booking"],
-            ["Booking Online", "Jadwal dokter real-time dan proses booking cepat.","/booking"],
+            ["Live Consultation", "Video call langsung dengan dokter pilihan Anda.","/doctor-booking"],
+            ["Booking Online", "Jadwal dokter real-time dan proses booking cepat.","/doctor-booking"],
             ["Drug Marketplace", "Akses obat terpercaya dengan pengiriman cepat.","/medicine"],
             ["Get Education", "Artikel edukasi kesehatan terbaru setiap hari.","/article"],
           ].map(([title, desc,link]) => (

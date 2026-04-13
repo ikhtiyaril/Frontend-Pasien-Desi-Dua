@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import FloatingPayment from "../components/FloatingPayment";
+import FloatingPayment from "./FloatingPayment";
 import PaymentMethodCheckbox from "./CheckboxPayment";
 
 const API = import.meta.env.VITE_API_URL;
@@ -18,6 +18,8 @@ export default function Checkout() {
   const [paymentFee, setPaymentFee] = useState(null);
   const [payment, setPayment] = useState([]);
   const [paymentTransaction, setPaymentTransaction] = useState(null);
+  const [receiverName, setReceiverName] = useState("");
+const [receiverPhone, setReceiverPhone] = useState("");
 
   // =============================
   // SHIPPING
@@ -195,13 +197,16 @@ export default function Checkout() {
     return alert("Lengkapi alamat pengiriman");
   }
 
+if (!receiverName || !receiverPhone) {
+  return alert("Isi nama & nomor telepon penerima dulu");
+}
   if (!selectedCourier) {
     return alert("Pilih jasa pengiriman");
   }
 
-  if (!paymentMethod) {
-    return alert("Pilih metode pembayaran");
-  }
+  // if (!paymentMethod) {
+  //   return alert("Pilih metode pembayaran");
+  // }
 
   if (!cart || cart.length === 0) {
     return alert("Keranjang kosong");
@@ -213,6 +218,11 @@ export default function Checkout() {
     // =========================
     // 1. CREATE ORDER
     // =========================
+    const fullAddressString = `
+Nama Penerima: ${receiverName},
+No Telp: ${receiverPhone},
+Alamat: ${addressDetail}
+`;
     const orderBody = {
       items: cart, // ini masih oke buat create order
       shipping: {
@@ -225,7 +235,7 @@ export default function Checkout() {
         regency,
         district,
         village,
-        address_detail: addressDetail,
+        address_detail: fullAddressString,
       },
       payment_method: paymentMethod,
     };
@@ -338,142 +348,154 @@ export default function Checkout() {
           </div>
 
           {/* ADDRESS */}
-          <div className="bg-white border rounded-xl p-4 space-y-3">
-            <h2 className="font-semibold text-blue-700">Alamat Pengiriman</h2>
+          <div className="bg-white border rounded-2xl p-5 space-y-5 shadow-sm">
+  <h2 className="font-semibold text-lg text-blue-700">
+    Alamat Pengiriman
+  </h2>
 
-            {/* PROVINCE */}
-            <select
-              className="w-full border rounded-lg p-2"
-              value={province}
-              onChange={(e) => {
-                setProvince(e.target.value);
-                setRegency("");
-                setDistrict("");
-                setVillage("");
-                setCouriers([]);
-                setShippingCost(0);
-                if (e.target.value) fetchRegencies(e.target.value);
-              }}
-            >
-              <option value="">Pilih Provinsi</option>
-              {provinces.map((p) => (
-                <option key={p.code} value={p.code}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+  {/* PROVINCE */}
+  <div className="space-y-1">
+    <label className="text-sm font-medium">Provinsi</label>
+    <select
+      className="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+      value={province}
+      onChange={(e) => {
+        setProvince(e.target.value);
+        setRegency("");
+        setDistrict("");
+        setVillage("");
+        setCouriers([]);
+        setShippingCost(0);
+        if (e.target.value) fetchRegencies(e.target.value);
+      }}
+    >
+      <option value="">Pilih Provinsi</option>
+      {provinces.map((p) => (
+        <option key={p.code} value={p.code}>
+          {p.name}
+        </option>
+      ))}
+    </select>
+  </div>
 
-            {/* REGENCY */}
-            {province && (
-              <select
-                className="w-full border rounded-lg p-2"
-                value={regency}
-                onChange={(e) => {
-                  setRegency(e.target.value);
-                  setDistrict("");
-                  setVillage("");
-                  setCouriers([]);
-                  setShippingCost(0);
-                  if (e.target.value) fetchDistricts(e.target.value);
-                }}
-              >
-                <option value="">Pilih Kabupaten / Kota</option>
-                {regencies.map((r) => (
-                  <option key={r.code} value={r.code}>
-                    {r.name}
-                  </option>
-                ))}
-              </select>
-            )}
+  {/* REGENCY */}
+  {province && (
+    <div className="space-y-1">
+      <label className="text-sm font-medium">Kabupaten / Kota</label>
+      <select
+        className="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+        value={regency}
+        onChange={(e) => {
+          setRegency(e.target.value);
+          setDistrict("");
+          setVillage("");
+          setCouriers([]);
+          setShippingCost(0);
+          if (e.target.value) fetchDistricts(e.target.value);
+        }}
+      >
+        <option value="">Pilih Kabupaten / Kota</option>
+        {regencies.map((r) => (
+          <option key={r.code} value={r.code}>
+            {r.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  )}
 
-            {/* DISTRICT */}
-            {regency && (
-              <select
-                className="w-full border rounded-lg p-2"
-                value={district}
-                onChange={(e) => {
-                  setDistrict(e.target.value);
-                  setVillage("");
-                  setCouriers([]);
-                  setShippingCost(0);
-                  if (e.target.value) fetchVillages(e.target.value);
-                }}
-              >
-                <option value="">Pilih Kecamatan</option>
-                {districts.map((d) => (
-                  <option key={d.code} value={d.code}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            )}
+  {/* DISTRICT */}
+  {regency && (
+    <div className="space-y-1">
+      <label className="text-sm font-medium">Kecamatan</label>
+      <select
+        className="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+        value={district}
+        onChange={(e) => {
+          setDistrict(e.target.value);
+          setVillage("");
+          setCouriers([]);
+          setShippingCost(0);
+          if (e.target.value) fetchVillages(e.target.value);
+        }}
+      >
+        <option value="">Pilih Kecamatan</option>
+        {districts.map((d) => (
+          <option key={d.code} value={d.code}>
+            {d.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  )}
 
-            {/* VILLAGE */}
-            {district && (
-              <select
-                className="w-full border rounded-lg p-2"
-                value={village}
-                onChange={(e) => {
-                  setVillage(e.target.value);
-                  setCouriers([]);
-                  setShippingCost(0);
-                  if (e.target.value) fetchShippingCost(e.target.value);
-                }}
-              >
-                <option value="">Pilih Desa / Kelurahan</option>
-                {villages.map((v) => (
-                  <option key={v.code} value={v.code}>
-                    {v.name}
-                  </option>
-                ))}
-              </select>
-            )}
+  {/* VILLAGE */}
+  {district && (
+    <div className="space-y-1">
+      <label className="text-sm font-medium">Desa / Kelurahan</label>
+      <select
+        className="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+        value={village}
+        onChange={(e) => {
+          setVillage(e.target.value);
+          setCouriers([]);
+          setShippingCost(0);
+          if (e.target.value) fetchShippingCost(e.target.value);
+        }}
+      >
+        <option value="">Pilih Desa / Kelurahan</option>
+        {villages.map((v) => (
+          <option key={v.code} value={v.code}>
+            {v.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  )}
 
-            <textarea
-              rows="3"
-              className="w-full border rounded-lg p-2"
-              placeholder="Alamat lengkap (Nama jalan, RT/RW, No Rumah)"
-              value={addressDetail}
-              onChange={(e) => setAddressDetail(e.target.value)}
-            />
-          </div>
+  {/* GRID INPUT */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-1">
+      <label className="text-sm font-medium">Nama Penerima</label>
+      <input
+  type="text"
+  value={receiverName}
+  onChange={(e) => setReceiverName(e.target.value)}
+  className="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+/>
+    </div>
 
+    <div className="space-y-1">
+      <label className="text-sm font-medium">No Telepon</label>
+      <input
+  type="text"
+  value={receiverPhone}
+  onChange={(e) => setReceiverPhone(e.target.value)}
+  className="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+/>
+    </div>
+  </div>
+
+  {/* ADDRESS DETAIL */}
+  <div className="space-y-1">
+    <label className="text-sm font-medium">Alamat Lengkap</label>
+    <textarea
+      rows="3"
+      className="w-full border rounded-xl p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+      placeholder="Nama jalan, RT/RW, No Rumah"
+      value={addressDetail}
+      onChange={(e) => setAddressDetail(e.target.value)}
+    />
+  </div>
+</div>
           {/* SHIPPING */}
-          {couriers.length > 0 && (
-            <div className="bg-white border rounded-xl p-4">
-              <h2 className="font-semibold text-blue-700 mb-2">Pilih Jasa Pengiriman (3kg)</h2>
-
-              {couriers.map((c, i) => (
-                <label
-                  key={i}
-                  className="flex justify-between items-center border rounded-lg p-3 mb-2 cursor-pointer"
-                >
-                  <div className="flex gap-2 items-center">
-                    <input
-                      type="radio"
-                      name="courier"
-                      checked={selectedCourier?.courier_code === c.courier_code}
-                      onChange={() => {
-                        setSelectedCourier(c);
-                        setShippingCost(c.price || 0);
-                      }}
-                    />
-                    <div>
-                      <p className="font-medium">{c.courier_name}</p>
-                      <p className="text-sm text-gray-500">Estimasi: {c.estimation || "-"}</p>
-                    </div>
-                  </div>
-                  <p className="font-semibold">Rp {Number(c.price || 0).toLocaleString("id-ID")}</p>
-                </label>
-              ))}
-            </div>
-          )}
+          
 
           {/* PAYMENT */}
-          <div className="bg-white border rounded-xl p-4">
+          {/*<div className="bg-white border rounded-xl p-4">
             <h2 className="font-semibold text-blue-700 mb-3">Metode Pembayaran</h2>
             <PaymentMethodCheckbox data={payment} selectedMethod={paymentMethod} onChange={setPaymentMethod} />
-          </div>
+          </div>*/}
         </div>
 
         {/* RIGHT */}
@@ -507,12 +529,42 @@ export default function Checkout() {
           >
             {isProcessing ? "Memproses..." : "Bayar Sekarang"}
           </button>
+
+          {couriers.length > 0 && (
+            <div className="bg-white border rounded-xl p-4 mt-5">
+              <h2 className="font-semibold text-blue-700 mb-2">Pilih Jasa Pengiriman (3kg)</h2>
+
+              {couriers.map((c, i) => (
+                <label
+                  key={i}
+                  className="flex justify-between items-center border rounded-lg p-3 mb-2 cursor-pointer"
+                >
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="radio"
+                      name="courier"
+                      checked={selectedCourier?.courier_code === c.courier_code}
+                      onChange={() => {
+                        setSelectedCourier(c);
+                        setShippingCost(c.price || 0);
+                      }}
+                    />
+                    <div>
+                      <p className="font-medium">{c.courier_name}</p>
+                      <p className="text-sm text-gray-500">Estimasi: {c.estimation || "-"}</p>
+                    </div>
+                  </div>
+                  <p className="font-semibold">Rp {Number(c.price || 0).toLocaleString("id-ID")}</p>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {paymentTransaction && (
+      {/* {paymentTransaction && (
         <FloatingPayment payment={paymentTransaction} onClose={() => setPaymentTransaction(null)} />
-      )}
+      )} */}
     </div>
   );
 }
