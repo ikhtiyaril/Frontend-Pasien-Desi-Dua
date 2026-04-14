@@ -105,6 +105,7 @@ const Login = () => {
             <LogIn className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Selamat Datang</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Login Terlebih dahulu Untuk Booking Online Dan Membeli Obat</h1>
         </div>
 
         {/* Main Card */}

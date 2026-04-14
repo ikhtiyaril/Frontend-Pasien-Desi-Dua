@@ -55,6 +55,13 @@ export default function BookingDoctorWeb() {
   const [duration, setDuration] = useState(30);
   const [selectedPayment, setSelectedPayment] = useState(null);
 
+  useEffect(() => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.replace("/login");
+      }
+    }, []);
+    
   // --- Utils ---
   const timeToMinutes = (t) => {
     if (!t) return 0;

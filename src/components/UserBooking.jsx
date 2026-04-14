@@ -47,6 +47,12 @@ const [loading,setLoading] = useState(false)
   // =====================
   // FETCH SERVICES
   // =====================
+  useEffect(() => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.replace("/login");
+      }
+    }, []);
  const fetchServices = async () => {
   try {
     const res = await axios.get(`${API}/api/service`);
