@@ -280,8 +280,15 @@ export default function BookingDoctorWeb() {
 
   const handleSubmit = async () => {
 
-  
+  const token = localStorage.getItem('token');
 
+  // 🚫 BELUM LOGIN
+  if (!token) {
+    alert('Silakan login terlebih dahulu');
+    
+    // redirect ke halaman login (sesuaikan route lo)
+    window.location.href = '/login';
+  }
   // VALIDATION
   if (!form.date || !form.time_start) {
     console.log("❌ VALIDATION FAILED: DATE/TIME");

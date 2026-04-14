@@ -244,6 +244,15 @@ const generateSlots = () => {
   // =====================
  const handleSubmit = async () => {
   if (loading) return; // 🔒 anti double click
+   const token = localStorage.getItem('token');
+
+  // 🚫 BELUM LOGIN
+  if (!token) {
+    alert('Silakan login terlebih dahulu');
+    
+    // redirect ke halaman login (sesuaikan route lo)
+    window.location.href = '/login';
+  }
 
   // VALIDATION
   if (!form.date || !form.time_start) {
@@ -259,7 +268,7 @@ const generateSlots = () => {
   setLoading(true);
 
   try {
-    const token = localStorage.getItem("token");
+    
 
     // =========================================
     // CREATE BOOKING

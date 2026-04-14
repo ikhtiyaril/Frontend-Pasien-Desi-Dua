@@ -192,7 +192,15 @@ export default function UserBookingMobile() {
   // =====================
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
+     const token = localStorage.getItem('token');
+
+  // 🚫 BELUM LOGIN
+  if (!token) {
+    alert('Silakan login terlebih dahulu');
+    
+    // redirect ke halaman login (sesuaikan route lo)
+    window.location.href = '/login';
+  }
 
     try {
       const res = await axios.post(`${API}/api/booking`, form, {

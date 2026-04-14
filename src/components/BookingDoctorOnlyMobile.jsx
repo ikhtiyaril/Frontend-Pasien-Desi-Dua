@@ -277,6 +277,15 @@ export default function BookingDoctorOnlyMobile() {
   };
 
   const handleSubmit = async () => {
+     const token = localStorage.getItem('token');
+
+  // 🚫 BELUM LOGIN
+  if (!token) {
+    alert('Silakan login terlebih dahulu');
+    
+    // redirect ke halaman login (sesuaikan route lo)
+    window.location.href = '/login';
+  }
     if (!form.date || !form.time_start) return alert('Tanggal & jam wajib diisi');
     if (!selectedPayment) return alert('Pilih metode pembayaran');
     if (!selectedService) return alert('Service tidak tersedia');

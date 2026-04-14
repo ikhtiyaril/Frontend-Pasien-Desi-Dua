@@ -191,6 +191,15 @@ const [receiverPhone, setReceiverPhone] = useState("");
   // =============================
   const handleCheckout = async () => {
   if (isProcessing) return;
+   const token = localStorage.getItem('token');
+
+  // 🚫 BELUM LOGIN
+  if (!token) {
+    alert('Silakan login terlebih dahulu');
+    
+    // redirect ke halaman login (sesuaikan route lo)
+    window.location.href = '/login';
+  }
 
   // VALIDASI
   if (!province || !regency || !district || !village || !addressDetail) {
