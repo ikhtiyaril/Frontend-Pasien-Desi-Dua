@@ -89,7 +89,7 @@ export default function Footer() {
           <h3 className="font-semibold mb-4">Ikuti Kami</h3>
           <div className="flex space-x-4">
             {/* IG */}
-            <a className="hover:opacity-70 cursor-pointer">
+            <a className="hover:opacity-70 cursor-pointer" href="https://www.instagram.com/apotekdesidua?igsh=ZnB5eHNqZHlyNjNp">
               <svg
                 className="w-6 h-6 text-gray-700"
                 fill="currentColor"
@@ -100,7 +100,7 @@ export default function Footer() {
             </a>
 
             {/* FB */}
-            <a className="hover:opacity-70 cursor-pointer">
+            <a className="hover:opacity-70 cursor-pointer" href="https://www.facebook.com/profile.php?id=61574344869164">
               <svg
                 className="w-6 h-6 text-gray-700"
                 fill="currentColor"
